@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "nickname": "冠军玩家",
+    "score": 1500,
+    "time": 45,
+    "rank": 1
+  },
+  {
+    "id": 2,
+    "nickname": "高手玩家",
+    "score": 1200,
+    "time": 30,
+    "rank": 2
+  },
+  {
+    "id": 3,
+    "nickname": "新手玩家",
+    "score": 800,
+    "time": 20,
+    "rank": 3
+  }
+] 

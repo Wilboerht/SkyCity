@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sky City - Main Page</title>
+    <style>
+        /* Global Styles */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            height: 100%;
+            background: linear-gradient(to bottom, #a1c4fd, #c2e9fb);
+            overflow: hidden;
+        }
+        
+        /* Container */
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
+        
+        /* Logo Section */
+        .logo {
+            margin-bottom: 50px;
+            text-align: center;
+        }
+        
+        .logo h1 {
+            font-family: 'Georgia', serif;
+            font-size: 4em;
+            color: #2b6cb0;
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+            margin: 0;
+            letter-spacing: 5px;
+        }
+        
+        .logo p {
+            color: #4a5568;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+        
+        /* Buttons Section */
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+        
+        .btn {
+            background-color: #2b6cb0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            min-width: 250px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover {
+            background-color: #1a4a85;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Modal Styles */
+        .modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal-container.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal-container.show .modal {
+            transform: scale(1);
+        }
+        
+        .modal h2 {
+            color: #2b6cb0;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .modal input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        
+        .modal input:focus {
+            border-color: #4299e1;
+            outline: none;
+        }
+        
+        .modal button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .modal button:hover {
+            background-color: #2b6cb0;
+        }
+        
+        /* Background Decoration */
+        .clouds {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+        }
+        
+        .cloud1 {
+            width: 200px;
+            height: 60px;
+            top: 15%;
+            left: 10%;
+            animation: float 30s linear infinite;
+        }
+        
+        .cloud2 {
+            width: 300px;
+            height: 80px;
+            top: 25%;
+            left: 70%;
+            animation: float 34s linear infinite;
+        }
+        
+        .cloud3 {
+            width: 150px;
+            height: 50px;
+            top: 60%;
+            left: 20%;
+            animation: float 26s linear infinite;
+        }
+        
+        .cloud4 {
+            width: 220px;
+            height: 70px;
+            top: 75%;
+            left: 65%;
+            animation: float 32s linear infinite;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateX(-10%);
+            }
+            100% {
+                transform: translateX(110%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>SKY CITY</h1>
+            <p>Build, Connect, Guide</p>
+        </div>
+        
+        <div class="buttons">
+            <button class="btn" id="newGameBtn">New Game</button>
+            <button class="btn" id="loadGameBtn">Load Game</button>
+            <button class="btn" id="rankingBtn">Ranking</button>
+        </div>
+        
+        <div class="clouds">
+            <div class="cloud cloud1"></div>
+            <div class="cloud cloud2"></div>
+            <div class="cloud cloud3"></div>
+            <div class="cloud cloud4"></div>
+        </div>
+    </div>
+    
+    <!-- Nickname Modal -->
+    <div class="modal-container" id="nicknameModal">
+        <div class="modal">
+            <h2>Enter Your Nickname</h2>
+            <input type="text" id="nicknameInput" placeholder="Enter a nickname" maxlength="15">
+            <button id="confirmBtn">Confirm</button>
+        </div>
+    </div>
+    
+    <script>
+        // DOM Elements
+        const newGameBtn = document.getElementById('newGameBtn');
+        const loadGameBtn = document.getElementById('loadGameBtn');
+        const rankingBtn = document.getElementById('rankingBtn');
+        const nicknameModal = document.getElementById('nicknameModal');
+        const nicknameInput = document.getElementById('nicknameInput');
+        const confirmBtn = document.getElementById('confirmBtn');
+        
+        // Event Listeners
+        newGameBtn.addEventListener('click', () => {
+            nicknameModal.classList.add('show');
+        });
+        
+        loadGameBtn.addEventListener('click', () => {
+            // Trigger file selection dialog
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.json';
+            fileInput.addEventListener('change', handleFileSelect);
+            fileInput.click();
+        });
+        
+        rankingBtn.addEventListener('click', () => {
+            window.location.href = '01_Ranking_Page.html';
+        });
+        
+        confirmBtn.addEventListener('click', () => {
+            const nickname = nicknameInput.value.trim();
+            if (nickname) {
+                // Store nickname and navigate to level selection
+                localStorage.setItem('playerNickname', nickname);
+                window.location.href = '01_Level_Selection_Page.html';
+            } else {
+                alert('Please enter a nickname!');
+            }
+        });
+        
+        // Close modal when clicking outside of it
+        nicknameModal.addEventListener('click', (e) => {
+            if (e.target === nicknameModal) {
+                nicknameModal.classList.remove('show');
+            }
+        });
+        
+        // Handle file selection for loading saved game
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const gameData = JSON.parse(e.target.result);
+                    // Store the loaded game data
+                    localStorage.setItem('loadedGameData', JSON.stringify(gameData));
+                    // Navigate to the game page
+                    window.location.href = '01_Game_Page.html?loaded=true';
+                } catch (error) {
+                    alert('Error loading game data: Invalid file format');
+                    console.error('Error parsing JSON:', error);
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        // Add visual effect to buttons
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+            button.addEventListener('mousedown', () => {
+                button.style.transform = 'scale(0.95)';
+            });
+            
+            button.addEventListener('mouseup', () => {
+                button.style.transform = 'translateY(-2px)';
+            });
+            
+            button.addEventListener('mouseleave', () => {
+                button.style.transform = 'none';
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sky City - Level Selection</title>
+    <style>
+        /* Global Styles */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            height: 100%;
+            background: linear-gradient(to bottom, #a1c4fd, #c2e9fb);
+            overflow: hidden;
+        }
+        
+        /* Container */
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            color: #2b6cb0;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .player-info {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 1.2em;
+            color: #4a5568;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Level Selection */
+        .levels {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .level-card {
+            flex: 1;
+            max-width: 220px;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .level-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .level-header {
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            background-color: #2b6cb0;
+            color: white;
+        }
+        
+        .level-easy .level-header {
+            background-color: #48bb78;
+        }
+        
+        .level-normal .level-header {
+            background-color: #ed8936;
+        }
+        
+        .level-hard .level-header {
+            background-color: #e53e3e;
+        }
+        
+        .level-content {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .level-details {
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #4a5568;
+        }
+        
+        .level-select-btn {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+        
+        .level-select-btn:hover {
+            background-color: #2b6cb0;
+        }
+        
+        /* Back Button */
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background-color: rgba(255, 255, 255, 1);
+        }
+        
+        /* Icons */
+        .icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        /* Background Decoration */
+        .clouds {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+        }
+        
+        .cloud1 {
+            width: 200px;
+            height: 60px;
+            top: 15%;
+            left: 10%;
+            animation: float 40s linear infinite;
+        }
+        
+        .cloud2 {
+            width: 300px;
+            height: 80px;
+            top: 30%;
+            left: 70%;
+            animation: float 46s linear infinite;
+        }
+        
+        .cloud3 {
+            width: 150px;
+            height: 50px;
+            top: 60%;
+            left: 20%;
+            animation: float 38s linear infinite;
+        }
+        
+        .cloud4 {
+            width: 220px;
+            height: 70px;
+            top: 70%;
+            left: 65%;
+            animation: float 42s linear infinite;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateX(-10%);
+            }
+            100% {
+                transform: translateX(110%);
+            }
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .levels {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .level-card {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" id="backBtn">←</button>
+        
+        <div class="header">
+            <h1>Select Difficulty Level</h1>
+            <div class="player-info" id="playerInfo">
+                Player: <span id="playerNickname">Guest</span>
+            </div>
+        </div>
+        
+        <div class="levels">
+            <div class="level-card level-easy" id="easyLevel">
+                <div class="level-header">Easy</div>
+                <div class="level-content">
+                    <div class="icon">🏝️</div>
+                    <div class="level-details">
+                        <p>Starting Coins: 3000</p>
+                        <p>Birth Points: 1</p>
+                        <p>Destination Buildings: 3</p>
+                    </div>
+                    <button class="level-select-btn">Select</button>
+                </div>
+            </div>
+            
+            <div class="level-card level-normal" id="normalLevel">
+                <div class="level-header">Normal</div>
+                <div class="level-content">
+                    <div class="icon">🏙️</div>
+                    <div class="level-details">
+                        <p>Starting Coins: 5000</p>
+                        <p>Birth Points: 2</p>
+                        <p>Destination Buildings: 4</p>
+                    </div>
+                    <button class="level-select-btn">Select</button>
+                </div>
+            </div>
+            
+            <div class="level-card level-hard" id="hardLevel">
+                <div class="level-header">Hard</div>
+                <div class="level-content">
+                    <div class="icon">🌆</div>
+                    <div class="level-details">
+                        <p>Starting Coins: 8000</p>
+                        <p>Birth Points: 3</p>
+                        <p>Destination Buildings: 6</p>
+                    </div>
+                    <button class="level-select-btn">Select</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="clouds">
+            <div class="cloud cloud1"></div>
+            <div class="cloud cloud2"></div>
+            <div class="cloud cloud3"></div>
+            <div class="cloud cloud4"></div>
+        </div>
+    </div>
+    
+    <script>
+        // DOM Elements
+        const backBtn = document.getElementById('backBtn');
+        const playerNicknameElement = document.getElementById('playerNickname');
+        const easyLevel = document.getElementById('easyLevel');
+        const normalLevel = document.getElementById('normalLevel');
+        const hardLevel = document.getElementById('hardLevel');
+        
+        // Get player nickname from localStorage
+        const playerNickname = localStorage.getItem('playerNickname') || 'Guest';
+        playerNicknameElement.textContent = playerNickname;
+        
+        // Event Listeners
+        backBtn.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+        
+        easyLevel.addEventListener('click', () => {
+            startGame('easy');
+        });
+        
+        normalLevel.addEventListener('click', () => {
+            startGame('normal');
+        });
+        
+        hardLevel.addEventListener('click', () => {
+            startGame('hard');
+        });
+        
+        // Start a new game with the selected level
+        function startGame(level) {
+            // Initialize game data
+            const gameData = {
+                nickname: playerNickname,
+                level: level,
+                coins: level === 'easy' ? 3000 : (level === 'normal' ? 5000 : 8000),
+                score: 0,
+                timer: 100,
+                buildings: [],
+                roads: [],
+                tools: []
+            };
+            
+            // Store game data
+            localStorage.setItem('currentGameData', JSON.stringify(gameData));
+            
+            // Navigate to game page
+            window.location.href = '01_Game_Page.html?new=true';
+        }
+    </script>
+</body>
+</html> 

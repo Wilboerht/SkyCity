@@ -1,0 +1,1 @@
+[{"id":1,"nickname":"\u51a0\u519b\u73a9\u5bb6","score":1500,"time":45,"rank":1},{"id":2,"nickname":"\u9ad8\u624b\u73a9\u5bb6","score":1200,"time":30,"rank":2},{"id":3,"nickname":"\u65b0\u624b\u73a9\u5bb6","score":800,"time":20,"rank":3}]

@@ -1,0 +1,2574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sky City - Game</title>
+    <style>
+        /* Global Styles */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            height: 100%;
+            overflow: hidden;
+            background-color: #f0f9ff;
+        }
+        
+        /* Game Container */
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+        }
+        
+        /* Game Header */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #2b6cb0;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        
+        .game-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .player-info {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        
+        .wallet {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        
+        .wallet-icon {
+            font-size: 1.2em;
+        }
+        
+        .coin-amount {
+            font-weight: bold;
+        }
+        
+        .score-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        
+        .score-icon {
+            font-size: 1.2em;
+        }
+        
+        .score-value {
+            font-weight: bold;
+        }
+        
+        .level-info {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        
+        .timer-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        
+        .timer-icon {
+            font-size: 1.2em;
+        }
+        
+        .timer-value {
+            font-weight: bold;
+        }
+        
+        .game-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background-color: #3182ce;
+        }
+        
+        /* Game Content */
+        .game-content {
+            display: flex;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Game Map */
+        .game-map {
+            flex: 1;
+            position: relative;
+            overflow: auto;
+            background-image: url('./background/grass.png');
+            background-repeat: repeat;
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            padding: 20px; /* 添加内边距避免元素太贴近边缘 */
+        }
+        
+        .map-grid {
+            position: relative;
+            background-image: url('./background/grass.png');
+            background-repeat: repeat;
+            /* 去掉之前的transform-origin，现在在JS中设置 */
+            box-sizing: border-box;
+            z-index: 1;
+        }
+        
+        .grid-cell {
+            position: absolute;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            z-index: 1; /* 确保网格层级正确 */
+        }
+        
+        /* Tools Panel */
+        .tools-panel {
+            width: 80px;
+            background-color: #2d3748;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tool-btn {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
+            background-color: #4a5568;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+        
+        .tool-btn:hover {
+            background-color: #2b6cb0;
+        }
+        
+        .tool-btn.active {
+            background-color: #2b6cb0;
+            box-shadow: 0 0 0 3px #63b3ed;
+        }
+        
+        .tool-icon {
+            width: 32px;
+            height: 32px;
+        }
+        
+        /* Modal Styles */
+        .modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal-container.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.5em;
+            color: #2b6cb0;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #718096;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .modal-btn {
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        
+        .modal-btn.primary {
+            background-color: #2b6cb0;
+            color: white;
+        }
+        
+        .modal-btn.secondary {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        /* Game Result Modals */
+        .result-modal {
+            text-align: center;
+        }
+        
+        .result-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        
+        .win-icon {
+            color: #48bb78;
+        }
+        
+        .lose-icon {
+            color: #e53e3e;
+        }
+        
+        .result-message {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        
+        .result-stats {
+            background-color: #f7fafc;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .result-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .result-stat:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Settings Menu */
+        .settings-menu {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            z-index: 100;
+            display: none;
+        }
+        
+        .settings-menu.show {
+            display: block;
+        }
+        
+        .settings-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+        
+        .settings-item:hover {
+            background-color: #f7fafc;
+        }
+        
+        /* Buildings */
+        .building {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        /* Roads */
+        .road {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #9ca3af; /* Gray road surface */
+            border: 2px solid #6b7280; /* Darker border */
+            box-sizing: border-box;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* Tools */
+        .tool-item {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 3;
+        }
+        
+        /* Citizens */
+        .citizen {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            z-index: 4;
+            transition: transform 0.5s ease;
+        }
+        
+        .citizen-destination {
+            position: absolute;
+            top: -15px;
+            left: 0;
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="game-info">
+                <div class="player-info">
+                    <span id="playerNickname">Player</span>
+                </div>
+                <div class="wallet">
+                    <span class="wallet-icon">💰</span>
+                    <span class="coin-amount" id="coinAmount">0</span>
+                </div>
+                <div class="score-container">
+                    <span class="score-icon">🏆</span>
+                    <span class="score-value" id="scoreValue">0</span>
+                </div>
+                <div class="level-info">
+                    <span id="levelInfo">Level: Easy</span>
+                </div>
+                <div class="timer-container">
+                    <span class="timer-icon">⏱️</span>
+                    <span class="timer-value" id="timerValue">100</span>
+                </div>
+            </div>
+            <div class="game-controls">
+                <button class="control-btn" id="launchBtn">Launch</button>
+                <button class="control-btn" id="settingsBtn">Settings</button>
+                <button class="control-btn" id="backBtn">Back</button>
+            </div>
+        </div>
+        
+        <div class="settings-menu" id="settingsMenu">
+            <div class="settings-item" id="saveGameBtn">Save Game</div>
+            <div class="settings-item" id="loadGameBtn">Load Game</div>
+        </div>
+        
+        <div class="game-content">
+            <div class="game-map" id="gameMap">
+                <div class="map-grid" id="mapGrid">
+                    <!-- Grid cells will be generated dynamically -->
+                </div>
+            </div>
+            
+            <div class="tools-panel">
+                <button class="tool-btn" id="roadPaverBtn" title="Road Paver (50 coins)">
+                    <img src="./road/horizontal.png" alt="Road Paver" class="tool-icon">
+                </button>
+                <button class="tool-btn" id="rebirthGateBtn" title="Rebirth Gate (1000 coins)">
+                    <img src="./rebirth.png" alt="Rebirth Gate" class="tool-icon">
+                </button>
+                <button class="tool-btn" id="navigatorBtn" title="Navigator (500 coins)">
+                    <img src="./navigator.png" alt="Navigator" class="tool-icon">
+                </button>
+                <button class="tool-btn" id="removeToolBtn" title="Remove Tool">
+                    <img src="./eraser.png" alt="Remove Tool" class="tool-icon">
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Win Modal -->
+    <div class="modal-container" id="winModal">
+        <div class="modal result-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">You Win!</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="result-icon win-icon">🎉</div>
+                <p class="result-message">All citizens reached their destinations!</p>
+                <div class="result-stats">
+                    <div class="result-stat">
+                        <span>Score:</span>
+                        <span id="winScoreValue">0</span>
+                    </div>
+                    <div class="result-stat">
+                        <span>Time Remaining:</span>
+                        <span id="winTimeValue">0</span>
+                    </div>
+                    <div class="result-stat">
+                        <span>Coins Remaining:</span>
+                        <span id="winCoinsValue">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn primary" id="nextLevelBtn">Next Level</button>
+                <button class="modal-btn secondary" id="endGameBtn">End Game</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lose Modal -->
+    <div class="modal-container" id="loseModal">
+        <div class="modal result-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Game Over</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="result-icon lose-icon">😢</div>
+                <p class="result-message" id="loseMessage">Time's up!</p>
+                <div class="result-stats">
+                    <div class="result-stat">
+                        <span>Score:</span>
+                        <span id="loseScoreValue">0</span>
+                    </div>
+                    <div class="result-stat">
+                        <span>Coins Remaining:</span>
+                        <span id="loseCoinsValue">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn primary" id="playAgainBtn">Play Again</button>
+                <button class="modal-btn secondary" id="loseEndGameBtn">End Game</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Game Constants
+        const CELL_SIZE = 40; // Size of each grid cell in pixels
+        const GRID_WIDTH = 20; // Number of cells horizontally
+        const GRID_HEIGHT = 15; // Number of cells vertically
+        const TIMER_START = 100; // Starting timer value
+        
+        // Game State
+        let gameState = {
+            mode: 'build', // 'build' or 'operation'
+            level: 'easy',
+            nickname: 'Player',
+            coins: 3000,
+            score: 0,
+            timer: TIMER_START,
+            buildings: [],
+            roads: [],
+            tools: [],
+            citizens: [],
+            selectedTool: null,
+            timerInterval: null,
+            isGameOver: false,
+            // New state variables for dragging roads
+            isDraggingRoad: false,
+            dragStartX: null,
+            dragStartY: null,
+            dragPath: [], // Array of {x, y} coordinates for the drag path
+            mapScale: 1 // Add map scale to game state
+        };
+        
+        // DOM Elements
+        const playerNicknameElement = document.getElementById('playerNickname');
+        const coinAmountElement = document.getElementById('coinAmount');
+        const scoreValueElement = document.getElementById('scoreValue');
+        const levelInfoElement = document.getElementById('levelInfo');
+        const timerValueElement = document.getElementById('timerValue');
+        const launchBtn = document.getElementById('launchBtn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const backBtn = document.getElementById('backBtn');
+        const settingsMenu = document.getElementById('settingsMenu');
+        const saveGameBtn = document.getElementById('saveGameBtn');
+        const loadGameBtn = document.getElementById('loadGameBtn');
+        const gameMap = document.getElementById('gameMap');
+        const mapGrid = document.getElementById('mapGrid');
+        const toolButtons = document.querySelectorAll('.tool-btn');
+        const roadPaverBtn = document.getElementById('roadPaverBtn');
+        const rebirthGateBtn = document.getElementById('rebirthGateBtn');
+        const navigatorBtn = document.getElementById('navigatorBtn');
+        const removeToolBtn = document.getElementById('removeToolBtn');
+        
+        // Initialize the game when the page loads
+        document.addEventListener('DOMContentLoaded', initGame);
+        
+        function initGame() {
+            // Get game data from localStorage
+            loadGameData();
+            
+            // Update UI with game data
+            updateGameUI();
+            
+            // Generate the grid first (needed for scaling calculation)
+            generateGrid();
+            
+            // Calculate and apply map scaling
+            calculateAndApplyMapScale();
+            
+            // Generate buildings based on level
+            generateBuildings();
+            
+            // Set up event listeners
+            setupEventListeners();
+            window.addEventListener('resize', calculateAndApplyMapScale); // Adjust scale on resize
+        }
+        
+        function loadGameData() {
+            // Check if there's loaded game data
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('loaded') && params.get('loaded') === 'true') {
+                const loadedData = JSON.parse(localStorage.getItem('loadedGameData'));
+                if (loadedData) {
+                    gameState = { ...gameState, ...loadedData };
+                }
+            } else {
+                // Get data from level selection
+                const gameData = JSON.parse(localStorage.getItem('currentGameData'));
+                if (gameData) {
+                    gameState.nickname = gameData.nickname;
+                    gameState.level = gameData.level;
+                    gameState.coins = gameData.coins;
+                }
+            }
+        }
+        
+        function updateGameUI() {
+            playerNicknameElement.textContent = gameState.nickname;
+            coinAmountElement.textContent = gameState.coins;
+            scoreValueElement.textContent = gameState.score;
+            levelInfoElement.textContent = `Level: ${gameState.level.charAt(0).toUpperCase() + gameState.level.slice(1)}`;
+            timerValueElement.textContent = gameState.timer;
+        }
+        
+        function generateGrid() {
+            // Set grid dimensions
+            mapGrid.style.width = `${CELL_SIZE * GRID_WIDTH}px`;
+            mapGrid.style.height = `${CELL_SIZE * GRID_HEIGHT}px`;
+            
+            // Create grid cells
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.style.width = `${CELL_SIZE}px`;
+                    cell.style.height = `${CELL_SIZE}px`;
+                    cell.style.left = `${x * CELL_SIZE}px`;
+                    cell.style.top = `${y * CELL_SIZE}px`;
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+                    mapGrid.appendChild(cell);
+                }
+            }
+        }
+        
+        function generateBuildings() {
+            // Clear existing buildings
+            gameState.buildings = [];
+            Array.from(document.querySelectorAll('.building')).forEach(b => b.remove());
+            
+            // Determine number of buildings based on level
+            let birthPoints = 1;
+            let destinations = 3;
+            
+            if (gameState.level === 'normal') {
+                birthPoints = 2;
+                destinations = 4;
+            } else if (gameState.level === 'hard') {
+                birthPoints = 3;
+                destinations = 6;
+            }
+            
+            // Generate birth points
+            for (let i = 0; i < birthPoints; i++) {
+                createBuilding('birth-point', `./building/house_${Math.random() > 0.5 ? '1' : '2'}.png`);
+            }
+            
+            // Generate destination buildings
+            // Divide destinations evenly between the three types
+            const types = ['sun', 'moon', 'star'];
+            const typeIcons = {
+                'sun': './building/sun.png',
+                'moon': './building/moon.png',
+                'star': './building/star.png'
+            };
+            
+            let destCount = 0;
+            let typeIndex = 0;
+            
+            while (destCount < destinations) {
+                const type = types[typeIndex % 3];
+                createBuilding(type, typeIcons[type]);
+                typeIndex++;
+                destCount++;
+            }
+        }
+        
+        function createBuilding(type, iconSrc) {
+            // Find a random empty position
+            let position = getRandomEmptyPosition();
+            
+            // If no position found, try to make space
+            if (!position) {
+                console.error('No empty space for building');
+                return null;
+            }
+            
+            // Create the building object
+            const building = {
+                type: type,
+                x: position.x,
+                y: position.y,
+                connectedToRoad: false
+            };
+            
+            // Add to game state
+            gameState.buildings.push(building);
+            
+            // Create DOM element
+            const element = document.createElement('div');
+            element.className = 'building';
+            element.dataset.type = type;
+            element.dataset.x = position.x;
+            element.dataset.y = position.y;
+            element.style.left = `${position.x * CELL_SIZE}px`;
+            element.style.top = `${position.y * CELL_SIZE}px`;
+            
+            // Add image
+            const img = document.createElement('img');
+            img.src = iconSrc;
+            img.alt = type;
+            img.style.width = '100%';
+            img.style.height = '100%';
+            element.appendChild(img);
+            
+            // Add destinations for birth points
+            if (type === 'birth-point') {
+                // Add destination indicators later when operation mode starts
+            }
+            
+            // Add to map
+            mapGrid.appendChild(element);
+            
+            return building;
+        }
+        
+        function getRandomEmptyPosition() {
+            // Create a list of all possible positions
+            const positions = [];
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    // Skip positions near the edges to ensure buildings can be connected
+                    if (x > 1 && x < GRID_WIDTH - 2 && y > 1 && y < GRID_HEIGHT - 2) {
+                        positions.push({ x, y });
+                    }
+                }
+            }
+            
+            // Shuffle the positions
+            for (let i = positions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [positions[i], positions[j]] = [positions[j], positions[i]];
+            }
+            
+            // Find first position that doesn't overlap with existing buildings
+            for (const pos of positions) {
+                if (!isPositionOccupied(pos.x, pos.y)) {
+                    return pos;
+                }
+            }
+            
+            return null; // No empty position found
+        }
+        
+        function isPositionOccupied(x, y) {
+            // Check buildings
+            for (const building of gameState.buildings) {
+                if (building.x === x && building.y === y) {
+                    return true;
+                }
+            }
+            
+            // Check roads
+            for (const road of gameState.roads) {
+                if (road.x === x && road.y === y) {
+                    return true;
+                }
+            }
+            
+            // Check tools
+            for (const tool of gameState.tools) {
+                if (tool.x === x && tool.y === y) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        function setupEventListeners() {
+            // Tool selection
+            toolButtons.forEach(btn => {
+                btn.addEventListener('click', selectTool);
+            });
+            
+            // Map interaction - Updated for drag
+            mapGrid.addEventListener('mousedown', handleMapMouseDown);
+            mapGrid.addEventListener('mousemove', handleMapMouseMove);
+            mapGrid.addEventListener('mouseup', handleMapMouseUp);
+            mapGrid.addEventListener('mouseleave', handleMapMouseLeave); // Handle mouse leaving grid
+            
+            // Launch button
+            launchBtn.addEventListener('click', toggleGameMode);
+            
+            // Settings button
+            settingsBtn.addEventListener('click', toggleSettingsMenu);
+            
+            // Back button
+            backBtn.addEventListener('click', confirmExit);
+            
+            // Settings menu items
+            saveGameBtn.addEventListener('click', saveGame);
+            loadGameBtn.addEventListener('click', loadSavedGame);
+            
+            // Win and lose modal buttons
+            document.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', closeModal);
+            });
+            
+            document.getElementById('nextLevelBtn').addEventListener('click', goToNextLevel);
+            document.getElementById('endGameBtn').addEventListener('click', endGame);
+            document.getElementById('playAgainBtn').addEventListener('click', restartLevel);
+            document.getElementById('loseEndGameBtn').addEventListener('click', endGame);
+            
+            // Close settings menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (settingsMenu.classList.contains('show') && 
+                    !settingsMenu.contains(e.target) && 
+                    e.target !== settingsBtn) {
+                    settingsMenu.classList.remove('show');
+                }
+            });
+            window.addEventListener('resize', calculateAndApplyMapScale); // Ensure resize listener is added
+        }
+        
+        function selectTool(e) {
+            // Remove active class from all tool buttons
+            toolButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // If clicking the already selected tool, deselect it
+            if (gameState.selectedTool === this.id) {
+                gameState.selectedTool = null;
+                return;
+            }
+            
+            // Activate the clicked tool
+            this.classList.add('active');
+            gameState.selectedTool = this.id;
+            
+            // Show cost in UI
+            let cost = 0;
+            switch (this.id) {
+                case 'roadPaverBtn':
+                    cost = 50;
+                    break;
+                case 'rebirthGateBtn':
+                    // Rebirth gate should be disabled in easy level
+                    if (gameState.level === 'easy') {
+                        alert('Rebirth Gate is not available in Easy level');
+                        gameState.selectedTool = null;
+                        this.classList.remove('active');
+                        return;
+                    }
+                    cost = 1000;
+                    break;
+                case 'navigatorBtn':
+                    cost = 500;
+                    break;
+            }
+        }
+        
+        function handleMapMouseDown(e) {
+            // Only allow interaction in build mode
+            if (gameState.mode !== 'build') return;
+            
+            const coords = getMapCoordinates(e);
+            if (!coords) return;
+            
+            console.log("鼠标按下坐标:", coords.x, coords.y);
+            
+            if (gameState.selectedTool === 'roadPaverBtn') {
+                // Start dragging road
+                gameState.isDraggingRoad = true;
+                gameState.dragStartX = coords.x;
+                gameState.dragStartY = coords.y;
+                gameState.dragPath = [{ x: coords.x, y: coords.y }]; // Start path
+                clearPreview(); // Clear any single-cell preview
+                updateDragPreview(); // Show initial drag preview
+            } else if (gameState.selectedTool) {
+                 // Handle click for other tools (Rebirth, Navigator, Remove)
+                 handleToolClick(coords.x, coords.y);
+            }
+        }
+
+        function handleMapMouseMove(e) {
+            if (!gameState.isDraggingRoad) {
+                // Show single cell hover preview for non-dragging tools
+                showHoverPreview(e);
+                return;
+            }
+            
+            const coords = getMapCoordinates(e);
+            if (!coords) return;
+            
+            console.log("鼠标移动坐标:", coords.x, coords.y);
+            
+            const lastPath = gameState.dragPath[gameState.dragPath.length - 1];
+            if (coords.x === lastPath.x && coords.y === lastPath.y) {
+                return; // No change in cell
+            }
+
+            // Calculate the new path
+            gameState.dragPath = calculateDragPath(gameState.dragStartX, gameState.dragStartY, coords.x, coords.y);
+            
+            updateDragPreview();
+        }
+
+        function handleMapMouseUp(e) {
+            if (!gameState.isDraggingRoad) return;
+            
+            gameState.isDraggingRoad = false;
+            
+            // Final validation and placement
+            placeDraggedRoad();
+            
+            // Clear path and preview
+            gameState.dragPath = [];
+            clearPreview();
+        }
+
+        function handleMapMouseLeave(e) {
+            // If dragging and mouse leaves, cancel the drag
+            if (gameState.isDraggingRoad) {
+                 gameState.isDraggingRoad = false;
+                 gameState.dragPath = [];
+                 clearPreview();
+            }
+        }
+        
+        // New function to handle single clicks for non-dragging tools
+        function handleToolClick(x, y) {
+            if (gameState.selectedTool === 'rebirthGateBtn') {
+                placeRebirthGate(x, y);
+            } else if (gameState.selectedTool === 'navigatorBtn') {
+                placeNavigator(x, y);
+            } else if (gameState.selectedTool === 'removeToolBtn') {
+                removeItem(x, y);
+            }
+        }
+        
+        // Gets map coordinates from a mouse event, accounting for scale
+        function getMapCoordinates(e) {
+            const rect = mapGrid.getBoundingClientRect(); // Get actual dimensions after scaling
+            const scale = gameState.mapScale || 1;
+
+            // 计算鼠标位置相对于缩放后的网格中心的偏移
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            // 计算栅格单元格坐标 - 将鼠标坐标除以缩放后的单元格大小
+            const cellSize = CELL_SIZE * scale;
+            const x = Math.floor(mouseX / cellSize);
+            const y = Math.floor(mouseY / cellSize);
+            
+            // 确保坐标在游戏地图范围内
+            if (x < 0 || x >= GRID_WIDTH || y < 0 || y >= GRID_HEIGHT) return null;
+            return { x, y };
+        }
+
+        // Clears existing preview elements
+        function clearPreview() {
+             document.querySelectorAll('.drag-preview, .hover-preview').forEach(el => el.remove());
+        }
+        
+        // Calculates an L-shaped or straight path between two points
+        function calculateDragPath(startX, startY, endX, endY) {
+            const path = [];
+            
+            // 如果在同一行或同一列，绘制直线（最简单的情况）
+            if (startX === endX || startY === endY) {
+                // 水平或垂直直线
+                let currentX = startX;
+                let currentY = startY;
+                const stepX = startX === endX ? 0 : (startX < endX ? 1 : -1);
+                const stepY = startY === endY ? 0 : (startY < endY ? 1 : -1);
+                
+                // 添加起点
+                path.push({ x: currentX, y: currentY });
+                
+                // 移动到终点前的位置
+                while (currentX !== endX || currentY !== endY) {
+                    currentX += stepX;
+                    currentY += stepY;
+                    path.push({ x: currentX, y: currentY });
+                }
+            } else {
+                // L型路径 - 先添加起点
+                path.push({ x: startX, y: startY });
+                
+                // 计算水平和垂直距离
+                const horizontalDist = Math.abs(endX - startX);
+                const verticalDist = Math.abs(endY - startY);
+                
+                // 选择先移动较长的距离以生成更好的路径
+                if (horizontalDist >= verticalDist) {
+                    // 先水平移动
+                    let x = startX;
+                    const stepX = startX < endX ? 1 : -1;
+                    
+                    while (x !== endX) {
+                        x += stepX;
+                        path.push({ x: x, y: startY });
+                    }
+                    
+                    // 然后垂直移动
+                    let y = startY;
+                    const stepY = startY < endY ? 1 : -1;
+                    
+                    while (y !== endY) {
+                        y += stepY;
+                        path.push({ x: endX, y: y });
+                    }
+                } else {
+                    // 先垂直移动
+                    let y = startY;
+                    const stepY = startY < endY ? 1 : -1;
+                    
+                    while (y !== endY) {
+                        y += stepY;
+                        path.push({ x: startX, y: y });
+                    }
+                    
+                    // 然后水平移动
+                    let x = startX;
+                    const stepX = startX < endX ? 1 : -1;
+                    
+                    while (x !== endX) {
+                        x += stepX;
+                        path.push({ x: x, y: endY });
+                    }
+                }
+            }
+            
+            // 检查并移除路径中的重复点
+            const uniquePath = [];
+            const seen = new Set();
+            
+            for (const pos of path) {
+                const key = `${pos.x},${pos.y}`;
+                if (!seen.has(key)) {
+                    uniquePath.push(pos);
+                    seen.add(key);
+                }
+            }
+            
+            console.log("计算的拖动路径:", uniquePath);
+            return uniquePath;
+        }
+
+        // Updates the visual preview for the dragged road path
+        function updateDragPreview() {
+            clearPreview();
+            
+            let totalCost = 0;
+            let previewPath = [...gameState.dragPath]; // 使用当前拖动路径的副本
+            
+            // 跟踪哪些单元格可以放置道路
+            const validCells = new Set();
+            const invalidCells = new Set();
+            
+            // 检查每个预览单元格
+            previewPath.forEach((pos, index) => {
+                const cost = 50;
+                totalCost += cost;
+                
+                // 检查是否可以放置道路
+                let canPlaceCell = true;
+                
+                // 1. 检查是否位于地图边界内
+                if (pos.x < 0 || pos.x >= GRID_WIDTH || pos.y < 0 || pos.y >= GRID_HEIGHT) {
+                    canPlaceCell = false;
+                } 
+                // 2. 检查位置是否已被占用
+                else if (isPositionOccupied(pos.x, pos.y) && !(index === 0 && gameState.roads.some(r => r.x === pos.x && r.y === pos.y))) {
+                    canPlaceCell = false;
+                } 
+                // 3. 检查连接性
+                else if (index > 0) {
+                    // 检查与前一个单元格的连接
+                    const prevPos = previewPath[index - 1];
+                    const isAdjacent = (Math.abs(prevPos.x - pos.x) + Math.abs(prevPos.y - pos.y)) === 1;
+                    
+                    if (!isAdjacent) {
+                        canPlaceCell = false;
+                    } else if (!canPlaceRoadImproved(pos.x, pos.y)) {
+                        canPlaceCell = false;
+                    }
+                } 
+                // 4. 检查金币
+                else if (gameState.coins < totalCost) {
+                    canPlaceCell = false;
+                }
+                
+                // 保存结果
+                if (canPlaceCell) {
+                    validCells.add(`${pos.x},${pos.y}`);
+                } else {
+                    invalidCells.add(`${pos.x},${pos.y}`);
+                }
+            });
+            
+            // 创建预览元素
+            previewPath.forEach((pos, index) => {
+                const key = `${pos.x},${pos.y}`;
+                const isValid = validCells.has(key);
+                
+            const previewEl = document.createElement('div');
+                previewEl.className = 'drag-preview';
+            previewEl.style.position = 'absolute';
+            previewEl.style.width = `${CELL_SIZE}px`;
+            previewEl.style.height = `${CELL_SIZE}px`;
+                previewEl.style.left = `${pos.x * CELL_SIZE}px`;
+                previewEl.style.top = `${pos.y * CELL_SIZE}px`;
+                previewEl.style.opacity = isValid ? '0.7' : '0.5';
+                previewEl.style.pointerEvents = 'none';
+                previewEl.style.zIndex = '5';
+                
+                // 为非有效单元格添加红色背景
+                if (!isValid) {
+                    previewEl.style.backgroundColor = 'rgba(255, 0, 0, 0.4)';
+                }
+                
+                // 确定道路类型并添加图像
+                const img = document.createElement('img');
+                // 计算预览道路类型，考虑当前拖动路径
+                let previewRoadType;
+                
+                if (isValid) {
+                    previewRoadType = determinePreviewRoadType(pos.x, pos.y, previewPath, validCells);
+                } else {
+                    // 对于无效单元格，使用简单的路径类型（基于相邻单元格决定）
+                    if (index > 0) {
+                        const prevPos = previewPath[index - 1];
+                        if (prevPos.x < pos.x) previewRoadType = 'horizontal';
+                        else if (prevPos.x > pos.x) previewRoadType = 'horizontal';
+                        else if (prevPos.y < pos.y) previewRoadType = 'vertical';
+                        else previewRoadType = 'vertical';
+                    } else {
+                        previewRoadType = 'horizontal'; // 默认值
+                    }
+                }
+                
+                img.src = `./road/${previewRoadType}.png`;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                previewEl.appendChild(img);
+                
+                mapGrid.appendChild(previewEl);
+            });
+        }
+        
+        // New helper function to determine road type for preview, considering the drag path
+        function determinePreviewRoadType(x, y, previewPath, validCells) {
+            // 检查一个位置是否在预览路径中且是有效的
+            const isInValidPreviewPath = (px, py) => {
+                const key = `${px},${py}`;
+                return previewPath.some(p => p.x === px && p.y === py) && validCells.has(key);
+            };
+            
+            // 检查路径中的连接或现有的道路/建筑
+            const hasTop = hasRoadAt(x, y - 1);
+            const hasRight = hasRoadAt(x + 1, y);
+            const hasBottom = hasRoadAt(x, y + 1);
+            const hasLeft = hasRoadAt(x - 1, y);
+
+            // 计算连接数
+            const connections = [hasTop, hasRight, hasBottom, hasLeft].filter(Boolean).length;
+
+            // 根据连接确定道路类型
+            if (connections === 0) {
+                return 'horizontal'; // 没有连接时的默认值
+            } else if (connections === 1) {
+                if (hasTop) return 'top-end';
+                if (hasRight) return 'right-end';
+                if (hasBottom) return 'bottom-end';
+                if (hasLeft) return 'left-end';
+            } else if (connections === 2) {
+                // 两个连接
+                if (hasTop && hasBottom) return 'vertical';    // 上下连接 = 直线
+                if (hasLeft && hasRight) return 'horizontal';  // 左右连接 = 直线
+                
+                // L型弯道 - 根据图片名称和实际效果重新校准
+                // 图片 L-bend.png 对应 左下 (┘)
+                if (hasLeft && hasBottom) return 'L-bend'; 
+                // 图片 L-bend-mirror.png 对应 右下 (└)
+                if (hasRight && hasBottom) return 'L-bend-mirror';
+                // 图片 L-bend-horizontal-reverse.png 对应 左上 (┐)
+                if (hasLeft && hasTop) return 'L-bend-horizontal-reverse';
+                // 图片 L-bend-vertical-reverse.png 对应 右上 (┌)
+                if (hasRight && hasTop) return 'L-bend-vertical-reverse';
+                
+                // 如果出现未预料的两个连接组合（理论上不应发生），默认返回水平
+                 console.warn(`未处理的双连接: T:${hasTop} R:${hasRight} B:${hasBottom} L:${hasLeft}`);
+                 return 'horizontal';
+            } else if (connections === 3) {
+                if (!hasTop) return 'T-junction';
+                if (!hasRight) return 'T-junction-left';
+                if (!hasBottom) return 'T-junction-reverse';
+                if (!hasLeft) return 'T-junction-right';
+            } else {
+                return 'cross';
+            }
+            
+            return 'horizontal'; // 默认值
+        }
+
+        // New function to show single cell preview for non-dragging tools
+        function showHoverPreview(e) {
+             if (gameState.mode !== 'build' || !gameState.selectedTool || gameState.selectedTool === 'roadPaverBtn') {
+                  clearPreview(); // Clear preview if no tool or road tool selected (handled by drag)
+                  return;
+             }
+             
+             const coords = getMapCoordinates(e);
+             if (!coords) { clearPreview(); return; }
+
+             clearPreview(); // Clear previous hover preview
+             
+             const previewEl = document.createElement('div');
+             previewEl.className = 'hover-preview';
+             previewEl.style.position = 'absolute';
+             previewEl.style.width = `${CELL_SIZE}px`;
+             previewEl.style.height = `${CELL_SIZE}px`;
+             previewEl.style.left = `${coords.x * CELL_SIZE}px`;
+             previewEl.style.top = `${coords.y * CELL_SIZE}px`;
+            previewEl.style.opacity = '0.6';
+            previewEl.style.pointerEvents = 'none';
+            previewEl.style.zIndex = '5';
+            
+            const img = document.createElement('img');
+            img.style.width = '100%';
+            img.style.height = '100%';
+            
+             let canPlace = false;
+             let imgSrc = '';
+
+             if (gameState.selectedTool === 'rebirthGateBtn') {
+                 imgSrc = './rebirth.png';
+                 canPlace = !isPositionOccupied(coords.x, coords.y) && canPlaceRebirthGate(coords.x, coords.y);
+            } else if (gameState.selectedTool === 'navigatorBtn') {
+                 imgSrc = './navigator.png';
+                 canPlace = !isPositionOccupied(coords.x, coords.y) && canPlaceNavigator(coords.x, coords.y);
+            } else if (gameState.selectedTool === 'removeToolBtn') {
+                 imgSrc = './eraser.png';
+                 canPlace = canRemoveItem(coords.x, coords.y);
+            }
+            
+             if (imgSrc) {
+                  img.src = imgSrc;
+                  previewEl.appendChild(img);
+            if (!canPlace) {
+                       previewEl.style.backgroundColor = 'rgba(255, 0, 0, 0.4)';
+            }
+            mapGrid.appendChild(previewEl);
+             }
+        }
+
+        // Places the road segments along the drag path (Rewritten Logic)
+        function placeDraggedRoad() {
+            const finalPath = [...gameState.dragPath]; // Copy path
+            if (finalPath.length < 1) return; // Need at least one cell
+
+            let cumulativeCost = 0;
+            let placementPossible = true;
+            
+            // --- 简化验证逻辑 --- 
+            for (let i = 0; i < finalPath.length; i++) {
+                const pos = finalPath[i];
+                const isStart = (i === 0);
+                const existingRoad = gameState.roads.find(r => r.x === pos.x && r.y === pos.y);
+                
+                if (gameState.buildings.some(b => b.x === pos.x && b.y === pos.y) || 
+                    gameState.tools.some(t => t.x === pos.x && t.y === pos.y)) {
+                    console.log(`被建筑物或工具阻挡: ${pos.x},${pos.y}`);
+                    placementPossible = false; break;
+                }
+                if (existingRoad && !isStart) {
+                    console.log(`已有道路: ${pos.x},${pos.y}`);
+                    placementPossible = false; break;
+                }
+                if (!(isStart && existingRoad)) {
+                    cumulativeCost += 50;
+                    if (gameState.coins < cumulativeCost) {
+                        console.log('金币不足');
+                        placementPossible = false; break;
+                    }
+                }
+            }
+
+            if (!placementPossible) {
+                alert("无法放置道路 (被阻挡或金币不足)");
+                return;
+            }
+            
+            // --- 放置路径 (游戏状态和DOM) --- 
+            gameState.coins -= cumulativeCost; // 扣除总成本
+            updateGameUI();
+            
+            const newRoadPositions = []; // 存储新添加的道路DOM元素和位置
+            const coordinatesToUpdate = new Set(); // 存储所有需要更新类型的坐标 (x,y 字符串)
+            
+            // 1. 添加道路到游戏状态和DOM (使用临时类型)
+            finalPath.forEach(pos => {
+                // 只放置在非道路单元格上
+                if (!gameState.roads.some(r => r.x === pos.x && r.y === pos.y)) {
+                    // 添加到游戏状态 (临时类型)
+                    const roadData = { type: 'temp', x: pos.x, y: pos.y }; 
+                    gameState.roads.push(roadData);
+                    
+                    // 创建DOM元素 (临时图像)
+                    const element = document.createElement('div');
+                    element.className = 'road';
+                    element.dataset.x = pos.x;
+                    element.dataset.y = pos.y;
+                    element.dataset.type = 'temp'; // 标记为临时
+                    element.style.left = `${pos.x * CELL_SIZE}px`;
+                    element.style.top = `${pos.y * CELL_SIZE}px`;
+                    const img = document.createElement('img');
+                    img.src = `./road/horizontal.png`; // 占位图像
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    element.appendChild(img);
+                    mapGrid.appendChild(element);
+                    
+                    newRoadPositions.push({ x: pos.x, y: pos.y, element: element });
+                    
+                    // 添加自身及邻居坐标到更新列表
+                    coordinatesToUpdate.add(`${pos.x},${pos.y}`);
+                    coordinatesToUpdate.add(`${pos.x-1},${pos.y}`);
+                    coordinatesToUpdate.add(`${pos.x+1},${pos.y}`);
+                    coordinatesToUpdate.add(`${pos.x},${pos.y-1}`);
+                    coordinatesToUpdate.add(`${pos.x},${pos.y+1}`);
+                }
+            });
+
+            // --- 更新道路类型 (基于完整的游戏状态) ---
+            console.log("开始更新道路类型...");
+            const finalTypes = {}; // 存储计算出的最终类型 { "x,y": "type" }
+
+            // 2. 计算所有受影响道路的最终类型
+            coordinatesToUpdate.forEach(coordKey => {
+                const [x, y] = coordKey.split(',').map(Number);
+                // 只处理实际存在的道路
+                if (gameState.roads.some(r => r.x === x && r.y === y)) {
+                    finalTypes[coordKey] = determineRoadType(x, y); 
+                }
+            });
+
+            // 3. 更新游戏状态中的道路类型
+            gameState.roads.forEach(road => {
+                const key = `${road.x},${road.y}`;
+                if (finalTypes[key]) {
+                    road.type = finalTypes[key];
+                }
+            });
+
+            // 4. 更新DOM元素的图像和类型
+            coordinatesToUpdate.forEach(coordKey => {
+                const [x, y] = coordKey.split(',').map(Number);
+                const roadEl = document.querySelector(`.road[data-x="${x}"][data-y="${y}"]`);
+                if (roadEl && finalTypes[coordKey]) {
+                    const finalType = finalTypes[coordKey];
+                    const img = roadEl.querySelector('img');
+                    img.src = `./road/${finalType}.png`;
+                    img.alt = finalType;
+                    roadEl.dataset.type = finalType;
+                    console.log(`道路(${x},${y}) DOM 更新为 ${finalType}`);
+                } else if (roadEl && roadEl.dataset.type === 'temp') {
+                     // 如果一个单元格被添加到更新列表（因为是邻居）但本身不是路，
+                     // 并且它有一个临时元素（理论上不应该发生，但作为安全检查），则移除
+                     // console.warn(`移除孤立的临时道路元素 at ${x},${y}`);
+                     // roadEl.remove(); 
+                }
+            });
+            
+            console.log("道路类型更新完成。");
+            
+            // --- 最后更新建筑物连接 --- 
+            updateBuildingConnections();
+        }
+
+        // Simplified placeRoad - mainly for non-drag actions or direct calls if needed
+        function placeRoad(x, y) {
+            if (isPositionOccupied(x, y)) return;
+            if (!canPlaceRoad(x, y) && gameState.roads.length > 0) return; // Basic checks
+            if (gameState.coins < 50) {
+                alert("Not enough coins!");
+                return;
+            }
+            gameState.coins -= 50;
+            updateGameUI();
+            
+            const roadType = determineRoadType(x, y);
+            const road = { type: roadType, x: x, y: y };
+            gameState.roads.push(road);
+            
+            const element = document.createElement('div');
+            element.className = 'road';
+            element.dataset.type = roadType;
+            element.dataset.x = x;
+            element.dataset.y = y;
+            element.style.left = `${x * CELL_SIZE}px`;
+            element.style.top = `${y * CELL_SIZE}px`;
+            const img = document.createElement('img');
+            img.src = `./road/${roadType}.png`;
+            img.alt = roadType;
+            img.style.width = '100%';
+            img.style.height = '100%';
+            element.appendChild(img);
+            mapGrid.appendChild(element);
+            
+            updateAdjacentRoads(x, y); // Keep for single placement update
+            updateBuildingConnections();
+        }
+        
+        // Simplified canPlaceRoad - mainly checks building side connection rule
+        function canPlaceRoad(x, y) {
+            // Check rule against connecting to non-bottom of buildings
+            const buildingTop = gameState.buildings.find(b => b.x === x && b.y === y - 1);
+            if (buildingTop && (y === buildingTop.y + 1)) return false; 
+            const buildingRight = gameState.buildings.find(b => b.x === x + 1 && b.y === y);
+            if (buildingRight && (x === buildingRight.x - 1)) return false; 
+            const buildingLeft = gameState.buildings.find(b => b.x === x - 1 && b.y === y);
+            if (buildingLeft && (x === buildingLeft.x + 1)) return false; 
+            
+            // If no invalid building connection, placement regarding buildings is okay
+            // Connectivity to existing roads/path is handled within placeDraggedRoad validation
+            return true; 
+        }
+        
+        function determineRoadType(x, y) {
+            // console.log(`确定道路类型(${x},${y})`);
+            const hasTop = hasRoadAt(x, y - 1);
+            const hasRight = hasRoadAt(x + 1, y);
+            const hasBottom = hasRoadAt(x, y + 1);
+            const hasLeft = hasRoadAt(x - 1, y);
+            // console.log(`连接情况: 上=${hasTop}, 右=${hasRight}, 下=${hasBottom}, 左=${hasLeft}`);
+
+            const connections = [hasTop, hasRight, hasBottom, hasLeft].filter(Boolean).length;
+            
+            if (connections === 0) {
+                return 'horizontal'; // Default for no connections
+            } else if (connections === 1) {
+                if (hasTop) return 'top-end';
+                if (hasRight) return 'right-end';
+                if (hasBottom) return 'bottom-end';
+                if (hasLeft) return 'left-end';
+            } else if (connections === 2) {
+                // 两个连接
+                if (hasTop && hasBottom) return 'vertical';    // 上下连接 = 直线
+                if (hasLeft && hasRight) return 'horizontal';  // 左右连接 = 直线
+                
+                // L型弯道 - 根据图片名称和实际效果重新校准
+                // 图片 L-bend.png 对应 左下 (┘)
+                if (hasLeft && hasBottom) return 'L-bend'; 
+                // 图片 L-bend-mirror.png 对应 右下 (└)
+                if (hasRight && hasBottom) return 'L-bend-mirror';
+                // 图片 L-bend-horizontal-reverse.png 对应 左上 (┐)
+                if (hasLeft && hasTop) return 'L-bend-horizontal-reverse';
+                // 图片 L-bend-vertical-reverse.png 对应 右上 (┌)
+                if (hasRight && hasTop) return 'L-bend-vertical-reverse';
+                
+                // 如果出现未预料的两个连接组合（理论上不应发生），默认返回水平
+                 console.warn(`未处理的双连接: T:${hasTop} R:${hasRight} B:${hasBottom} L:${hasLeft}`);
+                 return 'horizontal';
+            } else if (connections === 3) {
+                if (!hasTop) return 'T-junction';        // No top connection
+                if (!hasRight) return 'T-junction-left';    // No right connection
+                if (!hasBottom) return 'T-junction-reverse'; // No bottom connection
+                if (!hasLeft) return 'T-junction-right';   // No left connection
+            } else { // connections === 4
+                return 'cross';
+            }
+            
+            // Fallback (should not be reached with exhaustive checks)
+            console.warn(`无法确定道路类型 at (${x},${y}), connections: ${connections}, T:${hasTop} R:${hasRight} B:${hasBottom} L:${hasLeft}`);
+            return 'horizontal';
+        }
+        
+        function hasRoadOrBuilding(x, y, checkBuildingBottomOnly = false, sourceX, sourceY) {
+            // 检查坐标是否越界
+            if (x < 0 || x >= GRID_WIDTH || y < 0 || y >= GRID_HEIGHT) {
+                // console.log(`检查(${x},${y})：坐标越界`);
+                return false;
+            }
+            
+            // 优先检查是否有道路
+            const hasRoad = gameState.roads.some(road => road.x === x && road.y === y);
+            if (hasRoad) {
+                // console.log(`检查(${x},${y})：有道路`);
+                return true;
+            }
+            
+            // 检查是否有建筑物，并应用连接规则
+            const building = gameState.buildings.find(b => b.x === x && b.y === y);
+            if (building) {
+                // 只有当检查上方连接 (checkBuildingBottomOnly=true)
+                // 且源坐标确实在建筑下方时，才算连接
+                if (checkBuildingBottomOnly && sourceY === y + 1 && sourceX === x) {
+                    // console.log(`检查(${x},${y})：有效的建筑物底部连接`);
+                return true;
+                } else {
+                    // 其他方向或不满足底部连接条件，建筑物不算连接
+                    // console.log(`检查(${x},${y})：有建筑物，但不算有效连接`);
+                    return false; 
+                }
+            }
+            
+            // 不再检查工具对连接的影响
+            // console.log(`检查(${x},${y})：无连接`);
+            return false; // 无道路，无有效建筑连接
+        }
+        
+        function updateAdjacentRoads(x, y) {
+            // Get adjacent road positions
+            const adjacentPositions = [
+                { x: x - 1, y: y },
+                { x: x + 1, y: y },
+                { x: x, y: y - 1 },
+                { x: x, y: y + 1 }
+            ];
+            
+            // Update each adjacent road
+            adjacentPositions.forEach(pos => {
+                const roadEl = document.querySelector(`.road[data-x="${pos.x}"][data-y="${pos.y}"]`);
+                if (roadEl) {
+                    const roadIndex = gameState.roads.findIndex(r => r.x === pos.x && r.y === pos.y);
+                    if (roadIndex !== -1) {
+                        const roadType = determineRoadType(pos.x, pos.y);
+                        gameState.roads[roadIndex].type = roadType;
+                        
+                        // Update road image
+                        const img = roadEl.querySelector('img');
+                        img.src = `./road/${roadType}.png`;
+                        img.alt = roadType;
+                        roadEl.dataset.type = roadType;
+                    }
+                }
+            });
+        }
+        
+        function updateBuildingConnections() {
+            gameState.buildings.forEach(building => {
+                // Check if building is next to a road
+                const isConnected = 
+                    gameState.roads.some(road => 
+                        (Math.abs(road.x - building.x) === 1 && road.y === building.y) ||
+                        (Math.abs(road.y - building.y) === 1 && road.x === building.x)
+                    );
+                
+                // Update building connection status
+                building.connectedToRoad = isConnected;
+                
+                // Update building appearance if needed
+                const buildingEl = document.querySelector(`.building[data-x="${building.x}"][data-y="${building.y}"]`);
+                if (buildingEl) {
+                    if (isConnected) {
+                        buildingEl.classList.add('connected');
+                    } else {
+                        buildingEl.classList.remove('connected');
+                    }
+                }
+            });
+        }
+        
+        function placeRebirthGate(x, y) {
+            // Check if position is occupied
+            if (isPositionOccupied(x, y)) return;
+            
+            // Check if rebirth gate can be placed here
+            if (!canPlaceRebirthGate(x, y)) return;
+            
+            // Check if player has enough coins
+            if (gameState.coins < 1000) {
+                alert("Not enough coins to place rebirth gate!");
+                return;
+            }
+            
+            // Deduct cost
+            gameState.coins -= 1000;
+            updateGameUI();
+            
+            // Create tool object
+            const tool = {
+                type: 'rebirth-gate',
+                x: x,
+                y: y
+            };
+            
+            // Add to game state
+            gameState.tools.push(tool);
+            
+            // Create DOM element
+            const element = document.createElement('div');
+            element.className = 'tool-item';
+            element.dataset.type = 'rebirth-gate';
+            element.dataset.x = x;
+            element.dataset.y = y;
+            element.style.left = `${x * CELL_SIZE}px`;
+            element.style.top = `${y * CELL_SIZE}px`;
+            
+            // Add image
+            const img = document.createElement('img');
+            img.src = './rebirth.png';
+            img.alt = 'Rebirth Gate';
+            img.style.width = '100%';
+            img.style.height = '100%';
+            element.appendChild(img);
+            
+            // Add to map
+            mapGrid.appendChild(element);
+        }
+        
+        function canPlaceRebirthGate(x, y) {
+            // Rebirth gate can only be placed at the end of a road
+            const adjacentRoads = countAdjacentRoads(x, y);
+            return adjacentRoads === 1;
+        }
+        
+        function placeNavigator(x, y) {
+            // Check if position is occupied
+            if (isPositionOccupied(x, y)) return;
+            
+            // Check if navigator can be placed here
+            if (!canPlaceNavigator(x, y)) return;
+            
+            // Check if player has enough coins
+            if (gameState.coins < 500) {
+                alert("Not enough coins to place navigator!");
+                return;
+            }
+            
+            // Deduct cost
+            gameState.coins -= 500;
+            updateGameUI();
+            
+            // Create tool object
+            const tool = {
+                type: 'navigator',
+                x: x,
+                y: y
+            };
+            
+            // Add to game state
+            gameState.tools.push(tool);
+            
+            // Create DOM element
+            const element = document.createElement('div');
+            element.className = 'tool-item';
+            element.dataset.type = 'navigator';
+            element.dataset.x = x;
+            element.dataset.y = y;
+            element.style.left = `${x * CELL_SIZE}px`;
+            element.style.top = `${y * CELL_SIZE}px`;
+            
+            // Add image
+            const img = document.createElement('img');
+            img.src = './navigator.png';
+            img.alt = 'Navigator';
+            img.style.width = '100%';
+            img.style.height = '100%';
+            element.appendChild(img);
+            
+            // Add to map
+            mapGrid.appendChild(element);
+        }
+        
+        function canPlaceNavigator(x, y) {
+            // Navigator can only be placed at a road intersection
+            const adjacentRoads = countAdjacentRoads(x, y);
+            return adjacentRoads >= 3;
+        }
+        
+        function countAdjacentRoads(x, y) {
+            const adjacentPositions = [
+                { x: x - 1, y: y },
+                { x: x + 1, y: y },
+                { x: x, y: y - 1 },
+                { x: x, y: y + 1 }
+            ];
+            
+            return adjacentPositions.filter(pos => {
+                return gameState.roads.some(road => road.x === pos.x && road.y === pos.y);
+            }).length;
+        }
+        
+        function removeItem(x, y) {
+            // Check if there's a removable item at this position
+            const roadIndex = gameState.roads.findIndex(road => road.x === x && road.y === y);
+            const toolIndex = gameState.tools.findIndex(tool => tool.x === x && tool.y === y);
+            
+            if (roadIndex !== -1) {
+                // Remove road from game state
+                const removedRoad = gameState.roads.splice(roadIndex, 1)[0];
+                
+                // Refund cost
+                gameState.coins += 50;
+                updateGameUI();
+                
+                // Remove road from DOM
+                const roadEl = document.querySelector(`.road[data-x="${x}"][data-y="${y}"]`);
+                if (roadEl) roadEl.remove();
+                
+                // Update adjacent roads
+                updateAdjacentRoads(x, y);
+                
+                // Update building connections
+                updateBuildingConnections();
+                
+                return true;
+            } else if (toolIndex !== -1) {
+                // Remove tool from game state
+                const removedTool = gameState.tools.splice(toolIndex, 1)[0];
+                
+                // Refund cost
+                if (removedTool.type === 'rebirth-gate') {
+                    gameState.coins += 1000;
+                } else if (removedTool.type === 'navigator') {
+                    gameState.coins += 500;
+                }
+                updateGameUI();
+                
+                // Remove tool from DOM
+                const toolEl = document.querySelector(`.tool-item[data-x="${x}"][data-y="${y}"]`);
+                if (toolEl) toolEl.remove();
+                
+                return true;
+            }
+            
+            return false;
+        }
+        
+        function canRemoveItem(x, y) {
+            // Can only remove roads and tools
+            return (
+                gameState.roads.some(road => road.x === x && road.y === y) ||
+                gameState.tools.some(tool => tool.x === x && tool.y === y)
+            );
+        }
+        
+        function toggleGameMode() {
+            if (gameState.mode === 'build') {
+                // Check if there are any birth points connected to roads
+                const connectedBirthPoints = gameState.buildings.filter(
+                    b => b.type === 'birth-point' && b.connectedToRoad
+                );
+                
+                if (connectedBirthPoints.length === 0) {
+                    alert("At least one Birth Point must be connected to a road!");
+                    return;
+                }
+                
+                // Check if there are any destination buildings connected to roads
+                const connectedDestinations = gameState.buildings.filter(
+                    b => b.type !== 'birth-point' && b.connectedToRoad
+                );
+                
+                if (connectedDestinations.length === 0) {
+                    alert("At least one destination building must be connected to a road!");
+                    return;
+                }
+                
+                // Switch to operation mode
+                gameState.mode = 'operation';
+                launchBtn.textContent = 'Build';
+                settingsBtn.disabled = false; // Enable settings in operation mode
+                
+                // Disable tools (except settings)
+                toolButtons.forEach(btn => {
+                    // Keep settings button interactive (already handled by enabling above)
+                    if (btn.id !== 'settingsBtn') { 
+                    btn.disabled = true;
+                    btn.classList.remove('active');
+                    }
+                });
+                gameState.selectedTool = null;
+                
+                // Initialize citizens
+                initializeCitizens();
+                
+                // Start timer
+                startTimer();
+            } else {
+                // Switch to build mode
+                gameState.mode = 'build';
+                launchBtn.textContent = 'Launch';
+                settingsBtn.disabled = true; // Disable settings in build mode
+                settingsMenu.classList.remove('show'); // Hide settings menu if open
+                
+                // Enable tools (all tools except settings, which is now disabled)
+                toolButtons.forEach(btn => {
+                    if (btn.id !== 'settingsBtn') { // Ensure settings remains disabled
+                    btn.disabled = false;
+                    }
+                }); // Corrected closing parenthesis for forEach
+                
+                // Clear citizens
+                clearCitizens();
+                
+                // Stop timer
+                stopTimer();
+                
+                // Reset game stats
+                gameState.score = 0;
+                updateGameUI();
+            }
+        }
+        
+        function toggleSettingsMenu() {
+            settingsMenu.classList.toggle('show');
+        }
+        
+        function confirmExit() {
+            if (confirm("Are you sure you want to exit? Any unsaved progress will be lost.")) {
+                window.location.href = 'index.html';
+            }
+        }
+        
+        function saveGame() {
+            // Create a download of the game state
+            const gameData = {
+                nickname: gameState.nickname,
+                level: gameState.level,
+                coins: gameState.coins,
+                score: gameState.score,
+                timer: gameState.timer,
+                buildings: gameState.buildings,
+                roads: gameState.roads,
+                tools: gameState.tools
+            };
+            
+            const dataStr = JSON.stringify(gameData);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportName = `sky_city_save_${Date.now()}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportName);
+            linkElement.click();
+            
+            // Hide the menu
+            settingsMenu.classList.remove('show');
+        }
+        
+        function loadSavedGame() {
+            // Create a file input element
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.json';
+            fileInput.addEventListener('change', handleFileSelect);
+            fileInput.click();
+            
+            // Hide the menu
+            settingsMenu.classList.remove('show');
+            
+            function handleFileSelect(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const loadedData = JSON.parse(e.target.result);
+                        
+                        // Clear current game elements
+                        Array.from(document.querySelectorAll('.building, .road, .tool-item, .citizen')).forEach(el => el.remove());
+                        
+                        // Update game state
+                        gameState.nickname = loadedData.nickname;
+                        gameState.level = loadedData.level;
+                        gameState.coins = loadedData.coins;
+                        gameState.score = loadedData.score;
+                        gameState.timer = loadedData.timer;
+                        gameState.buildings = loadedData.buildings || [];
+                        gameState.roads = loadedData.roads || [];
+                        gameState.tools = loadedData.tools || [];
+                        gameState.citizens = [];
+                        gameState.mode = 'build';
+                        
+                        // Update UI
+                        updateGameUI();
+                        launchBtn.textContent = 'Launch';
+                        
+                        // Recreate buildings
+                        gameState.buildings.forEach(building => {
+                            let iconSrc;
+                            if (building.type === 'birth-point') {
+                                iconSrc = `./building/house_${Math.random() > 0.5 ? '1' : '2'}.png`;
+                            } else if (building.type === 'sun') {
+                                iconSrc = './building/sun.png';
+                            } else if (building.type === 'moon') {
+                                iconSrc = './building/moon.png';
+                            } else if (building.type === 'star') {
+                                iconSrc = './building/star.png';
+                            }
+                            
+                            const element = document.createElement('div');
+                            element.className = 'building';
+                            element.dataset.type = building.type;
+                            element.dataset.x = building.x;
+                            element.dataset.y = building.y;
+                            element.style.left = `${building.x * CELL_SIZE}px`;
+                            element.style.top = `${building.y * CELL_SIZE}px`;
+                            
+                            const img = document.createElement('img');
+                            img.src = iconSrc;
+                            img.alt = building.type;
+                            img.style.width = '100%';
+                            img.style.height = '100%';
+                            element.appendChild(img);
+                            
+                            if (building.connectedToRoad) {
+                                element.classList.add('connected');
+                            }
+                            
+                            mapGrid.appendChild(element);
+                        });
+                        
+                        // Recreate roads
+                        gameState.roads.forEach(road => {
+                            const element = document.createElement('div');
+                            element.className = 'road';
+                            element.dataset.type = road.type;
+                            element.dataset.x = road.x;
+                            element.dataset.y = road.y;
+                            element.style.left = `${road.x * CELL_SIZE}px`;
+                            element.style.top = `${road.y * CELL_SIZE}px`;
+                            
+                            const img = document.createElement('img');
+                            img.src = `./road/${road.type}.png`;
+                            img.alt = road.type;
+                            img.style.width = '100%';
+                            img.style.height = '100%';
+                            element.appendChild(img);
+                            
+                            mapGrid.appendChild(element);
+                        });
+                        
+                        // Recreate tools
+                        gameState.tools.forEach(tool => {
+                            const element = document.createElement('div');
+                            element.className = 'tool-item';
+                            element.dataset.type = tool.type;
+                            element.dataset.x = tool.x;
+                            element.dataset.y = tool.y;
+                            element.style.left = `${tool.x * CELL_SIZE}px`;
+                            element.style.top = `${tool.y * CELL_SIZE}px`;
+                            
+                            const img = document.createElement('img');
+                            img.src = tool.type === 'rebirth-gate' ? './rebirth.png' : './navigator.png';
+                            img.alt = tool.type;
+                            img.style.width = '100%';
+                            img.style.height = '100%';
+                            element.appendChild(img);
+                            
+                            mapGrid.appendChild(element);
+                        });
+                        
+                        // Enable tools
+                        toolButtons.forEach(btn => {
+                            btn.disabled = false;
+                        });
+                        
+                        alert("Game loaded successfully!");
+                    } catch (error) {
+                        console.error("Error loading game:", error);
+                        alert("Error loading game. Invalid save file format.");
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+        
+        function closeModal() {
+            document.querySelectorAll('.modal-container').forEach(modal => {
+                modal.classList.remove('show');
+            });
+        }
+        
+        function goToNextLevel() {
+            // Determine next level
+            let nextLevel;
+            if (gameState.level === 'easy') {
+                nextLevel = 'normal';
+            } else if (gameState.level === 'normal') {
+                nextLevel = 'hard';
+            } else {
+                // If already at hard level, go to ranking page
+                window.location.href = '01_Ranking_Page.html';
+                return;
+            }
+            
+            // Store next level data, retaining and accumulating score and coins
+            const nextLevelData = {
+                nickname: gameState.nickname,
+                level: nextLevel,
+                coins: gameState.coins, // Coins carry over
+                score: gameState.score, // Score carries over
+                timer: 100 // Timer resets
+            };
+            
+            localStorage.setItem('currentGameData', JSON.stringify(nextLevelData));
+            
+            // Reload game page with next level
+            window.location.href = '01_Game_Page.html?new=true';
+        }
+        
+        function endGame() {
+            // Submit score to ranking
+            submitScore();
+            
+            // Navigate to ranking page
+            window.location.href = '01_Ranking_Page.html';
+        }
+        
+        function restartLevel() {
+            // Reset current level
+            const restartData = {
+                nickname: gameState.nickname,
+                level: gameState.level,
+                coins: gameState.level === 'easy' ? 3000 : (gameState.level === 'normal' ? 5000 : 8000),
+                score: 0,
+                timer: 100
+            };
+            
+            localStorage.setItem('currentGameData', JSON.stringify(restartData));
+            
+            // Reload game page
+            window.location.href = '01_Game_Page.html?new=true';
+        }
+
+        function initializeCitizens() {
+            // Clear any existing citizens
+            clearCitizens();
+            
+            // Get birth points connected to roads
+            const birthPoints = gameState.buildings.filter(
+                b => b.type === 'birth-point' && b.connectedToRoad
+            );
+            
+            // Get destination buildings connected to roads
+            const destinations = gameState.buildings.filter(
+                b => b.type !== 'birth-point' && b.connectedToRoad
+            );
+            
+            if (birthPoints.length === 0 || destinations.length === 0) {
+                return;
+            }
+            
+            // Clear previous destination indicators from birth points (No longer needed)
+            // document.querySelectorAll('.birth-point-destinations').forEach(el => el.remove());
+
+            birthPoints.forEach(birthPoint => {
+                for (let i = 0; i < 5; i++) {
+                    const destType = destinations[Math.floor(Math.random() * destinations.length)].type;
+                    
+                    setTimeout(() => {
+                        if (gameState.mode !== 'operation') return;
+                        
+                        const citizen = {
+                            id: `citizen-${birthPoint.x}-${birthPoint.y}-${i}`,
+                            x: birthPoint.x,
+                            y: birthPoint.y,
+                            birthPoint: birthPoint,
+                            destinationType: destType,
+                            path: [],
+                            currentPathIndex: 0,
+                            isMoving: false,
+                            enteredBuilding: false,
+                            reborn: false
+                        };
+                        
+                        gameState.citizens.push(citizen);
+                        
+                        const element = document.createElement('div');
+                        element.id = citizen.id;
+                        element.className = 'citizen';
+                        element.dataset.type = 'citizen';
+                        element.style.left = `${(birthPoint.x * CELL_SIZE) + (CELL_SIZE / 2) - 10}px`;
+                        element.style.top = `${(birthPoint.y * CELL_SIZE) + (CELL_SIZE / 2) - 10}px`;
+                        
+                        const img = document.createElement('img');
+                        img.src = `./citizen/medievalUnit_${Math.floor(Math.random() * 4) * 7 + 1}.png`;
+                        img.alt = 'Citizen';
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.position = 'absolute';
+                        img.style.left = '0';
+                        img.style.top = '0';
+                        img.style.zIndex = '1'; // Keep citizen image z-index
+                        element.appendChild(img);
+                        
+                        // Re-add destination indicator creation *on* the citizen element
+                        const destEl = document.createElement('div');
+                        destEl.className = 'citizen-destination'; // Use the original CSS class
+                        destEl.style.zIndex = '2'; // Ensure destination icon is above citizen image
+                        
+                        const destImgCitizen = document.createElement('img'); // Use a different variable name
+                        destImgCitizen.src = destType === 'sun' ? './building/sun.png' : 
+                                              destType === 'moon' ? './building/moon.png' : 
+                                              './building/star.png';
+                        destImgCitizen.alt = destType;
+                        destImgCitizen.style.width = '100%';
+                        destImgCitizen.style.height = '100%';
+                        destEl.appendChild(destImgCitizen);
+                        
+                        element.appendChild(destEl); // Add destination indicator to citizen div
+                        
+                        mapGrid.appendChild(element);
+                        
+                        setTimeout(() => {
+                            moveCitizen(citizen);
+                        }, 500);
+                        
+                    }, i * 2000);
+                }
+            });
+        }
+
+        function clearCitizens() {
+            // Remove all citizens from DOM
+            Array.from(document.querySelectorAll('.citizen')).forEach(el => el.remove());
+            
+            // Clear citizens array
+            gameState.citizens = [];
+        }
+
+        function moveCitizen(citizen) {
+            if (gameState.mode !== 'operation' || citizen.enteredBuilding) return;
+            
+            // If citizen doesn't have a path, find one
+            if (citizen.path.length === 0 || citizen.currentPathIndex >= citizen.path.length) {
+                findCitizenPath(citizen);
+            }
+            
+            // If still no path, stop moving
+            if (citizen.path.length === 0) {
+                return;
+            }
+            
+            // Get next position in path
+            const nextPos = citizen.path[citizen.currentPathIndex];
+            
+            // Update citizen position
+            citizen.x = nextPos.x;
+            citizen.y = nextPos.y;
+            citizen.currentPathIndex++;
+            
+            // Update DOM element
+            const element = document.getElementById(citizen.id);
+            if (!element) return;
+            
+            // Get correct orientation
+            let rotation = 0;
+            if (citizen.currentPathIndex < citizen.path.length) {
+                const currentPos = { x: citizen.x, y: citizen.y };
+                const futurePos = citizen.path[citizen.currentPathIndex];
+                
+                if (futurePos.x > currentPos.x) rotation = 90;
+                else if (futurePos.x < currentPos.x) rotation = 270;
+                else if (futurePos.y > currentPos.y) rotation = 180;
+            }
+            
+            // Move element with transition
+            element.style.transition = 'left 0.5s, top 0.5s';
+            element.style.left = `${(citizen.x * CELL_SIZE) + (CELL_SIZE / 2) - 10}px`;
+            element.style.top = `${(citizen.y * CELL_SIZE) + (CELL_SIZE / 2) - 10}px`;
+            element.style.transform = `rotate(${rotation}deg)`;
+            
+            // Check if citizen has entered a building
+            const building = gameState.buildings.find(b => b.x === citizen.x && b.y === citizen.y);
+            if (building) {
+                // If citizen enters birth point, make it reborn
+                if (building.type === 'birth-point' && citizen.reborn) {
+                    // Enable reborn citizen to start journey again
+                    citizen.reborn = false;
+                    citizen.path = [];
+                    citizen.currentPathIndex = 0;
+                    setTimeout(() => {
+                        moveCitizen(citizen);
+                    }, 500);
+                    return;
+                }
+                
+                // If citizen enters a building other than birth point
+                if (building.type !== 'birth-point') {
+                    // Check if building is the correct destination
+                    if (building.type === citizen.destinationType) {
+                        // Correct destination - increase score
+                        gameState.score += 100;
+                        gameState.coins += 100;
+                        updateGameUI();
+                        
+                        // Remove citizen
+                        citizen.enteredBuilding = true;
+                        element.remove();
+                        
+                        // Check win condition
+                        checkWinCondition();
+                    } else {
+                        // Wrong destination - decrease score
+                        gameState.score -= 100;
+                        updateGameUI();
+                        
+                        // Remove citizen
+                        citizen.enteredBuilding = true;
+                        element.remove();
+                        
+                        // Check fail condition
+                        checkFailCondition();
+                    }
+                    return;
+                }
+            }
+            
+            // Check if citizen is on a rebirth gate
+            const rebirthGate = gameState.tools.find(t => t.type === 'rebirth-gate' && t.x === citizen.x && t.y === citizen.y);
+            if (rebirthGate && !citizen.reborn) {
+                // Mark citizen as reborn and find path back to birth point
+                citizen.reborn = true;
+                citizen.path = findPathTo(citizen, citizen.birthPoint);
+                citizen.currentPathIndex = 0;
+            }
+            
+            // Continue moving after a delay
+            setTimeout(() => {
+                moveCitizen(citizen);
+            }, 500);
+        }
+
+        function findCitizenPath(citizen) {
+            // Find destination building of correct type
+            const destinations = gameState.buildings.filter(b => b.type === citizen.destinationType && b.connectedToRoad);
+            
+            if (destinations.length === 0) {
+                return; // No valid destinations
+            }
+            
+            // Find the nearest destination
+            let nearestDest = null;
+            let shortestPath = null;
+            
+            for (const dest of destinations) {
+                const path = findPathTo(citizen, dest);
+                if (path && (!shortestPath || path.length < shortestPath.length)) {
+                    shortestPath = path;
+                    nearestDest = dest;
+                }
+            }
+            
+            if (shortestPath) {
+                citizen.path = shortestPath;
+                citizen.currentPathIndex = 0;
+            } else {
+                // If no path found, try to find a path to any road
+                const roads = gameState.roads;
+                if (roads.length > 0) {
+                    const randomRoad = roads[Math.floor(Math.random() * roads.length)];
+                    const randomPath = findPathTo(citizen, randomRoad);
+                    if (randomPath) {
+                        citizen.path = randomPath;
+                        citizen.currentPathIndex = 0;
+                    }
+                }
+            }
+        }
+
+        function findPathTo(citizen, target) {
+            // Simple breadth-first search to find a path
+            const queue = [{ x: citizen.x, y: citizen.y, path: [] }];
+            const visited = new Set();
+            
+            while (queue.length > 0) {
+                const current = queue.shift();
+                const key = `${current.x},${current.y}`;
+                
+                // Skip if already visited
+                if (visited.has(key)) continue;
+                visited.add(key);
+                
+                // If reached destination
+                if (current.x === target.x && current.y === target.y) {
+                    return current.path;
+                }
+                
+                // Get neighbors
+                const neighbors = [
+                    { x: current.x - 1, y: current.y },
+                    { x: current.x + 1, y: current.y },
+                    { x: current.x, y: current.y - 1 },
+                    { x: current.x, y: current.y + 1 }
+                ];
+                
+                // Check navigator to guide citizen
+                const navigator = gameState.tools.find(t => 
+                    t.type === 'navigator' && 
+                    t.x === current.x && 
+                    t.y === current.y
+                );
+                
+                if (navigator) {
+                    // Find the best direction to reach destination
+                    let bestDirection = null;
+                    let minDistance = Infinity;
+                    
+                    for (const neighbor of neighbors) {
+                        // Skip if out of bounds
+                        if (neighbor.x < 0 || neighbor.x >= GRID_WIDTH || neighbor.y < 0 || neighbor.y >= GRID_HEIGHT) {
+                            continue;
+                        }
+                        
+                        // Calculate Manhattan distance to destination
+                        const distance = Math.abs(neighbor.x - target.x) + Math.abs(neighbor.y - target.y);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            bestDirection = neighbor;
+                        }
+                    }
+                    
+                    if (bestDirection) {
+                        // Only consider the best direction
+                        neighbors.splice(0, neighbors.length);
+                        neighbors.push(bestDirection);
+                    }
+                }
+                
+                for (const neighbor of neighbors) {
+                    // Skip if out of bounds
+                    if (neighbor.x < 0 || neighbor.x >= GRID_WIDTH || neighbor.y < 0 || neighbor.y >= GRID_HEIGHT) {
+                        continue;
+                    }
+                    
+                    // Skip if not a road or building
+                    const isRoad = gameState.roads.some(r => r.x === neighbor.x && r.y === neighbor.y);
+                    const isBuilding = gameState.buildings.some(b => b.x === neighbor.x && b.y === neighbor.y);
+                    const isTool = gameState.tools.some(t => t.x === neighbor.x && t.y === neighbor.y);
+                    
+                    if (!isRoad && !isBuilding && !isTool) {
+                        continue;
+                    }
+                    
+                    // Add to queue
+                    queue.push({
+                        x: neighbor.x,
+                        y: neighbor.y,
+                        path: [...current.path, { x: neighbor.x, y: neighbor.y }]
+                    });
+                }
+            }
+            
+            return null; // No path found
+        }
+
+        function startTimer() {
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+            
+            gameState.timerInterval = setInterval(() => {
+                if (gameState.timer <= 0) {
+                    // Time's up - game over
+                    stopTimer();
+                    showLoseModal("Time's up!");
+                    return;
+                }
+                
+                gameState.timer--;
+                timerValueElement.textContent = gameState.timer;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
+            }
+        }
+
+        function checkWinCondition() {
+            // Check if all citizens have entered a building
+            const activeCitizens = gameState.citizens.filter(c => !c.enteredBuilding);
+            
+            if (activeCitizens.length === 0 && gameState.citizens.length > 0) {
+                // All citizens have entered a building and score is positive
+                if (gameState.score > 0) {
+                    showWinModal();
+                } else {
+                    showLoseModal("All citizens entered a building, but your score is not positive.");
+                }
+            }
+        }
+
+        function checkFailCondition() {
+            // Check if score is negative
+            if (gameState.score < 0) {
+                showLoseModal("Your score has dropped below zero!");
+            }
+        }
+
+        function showWinModal() {
+            stopTimer();
+            gameState.isGameOver = true;
+            
+            // Update win modal stats
+            document.getElementById('winScoreValue').textContent = gameState.score;
+            document.getElementById('winTimeValue').textContent = gameState.timer;
+            document.getElementById('winCoinsValue').textContent = gameState.coins;
+            
+            // Show win modal
+            document.getElementById('winModal').classList.add('show');
+            
+            // Submit score
+            submitScore();
+        }
+
+        function showLoseModal(reason) {
+            stopTimer();
+            gameState.isGameOver = true;
+            
+            // Update lose modal stats
+            document.getElementById('loseMessage').textContent = reason;
+            document.getElementById('loseScoreValue').textContent = gameState.score;
+            document.getElementById('loseCoinsValue').textContent = gameState.coins;
+            
+            // Show lose modal
+            document.getElementById('loseModal').classList.add('show');
+        }
+
+        function submitScore() {
+            // Create ranking data
+            const rankingData = {
+                name: gameState.nickname,
+                score: gameState.score,
+                time: gameState.timer
+            };
+            
+            // Use fetch to submit data to the backend API
+            fetch('backend/api/v1/rank.php', { // 去掉前导斜杠
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(rankingData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    console.error(`HTTP error! status: ${response.status}`);
+                    return response.text().then(text => { throw new Error(text || 'Failed to submit score') });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Ranking submitted successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error submitting ranking via API:', error);
+                // 不再使用localStorage备份
+            });
+        }
+
+        // New function to calculate and apply scaling
+        function calculateAndApplyMapScale() {
+            const mapContainer = gameMap; // The container element
+            const gridElement = mapGrid;
+            const gridWidthPx = GRID_WIDTH * CELL_SIZE;
+            const gridHeightPx = GRID_HEIGHT * CELL_SIZE;
+
+            const containerWidth = mapContainer.clientWidth;
+            const containerHeight = mapContainer.clientHeight;
+
+            // Calculate the maximum scale factor that fits the grid within the container
+            // Leave some margin for better visibility
+            const scaleX = (containerWidth - 40) / gridWidthPx;
+            const scaleY = (containerHeight - 40) / gridHeightPx;
+            const scale = Math.min(scaleX, scaleY, 1.0); // Use the smaller scale factor, max 1.0
+            
+            // 计算边距以居中显示
+            const marginLeft = (containerWidth - (gridWidthPx * scale)) / 2;
+            const marginTop = (containerHeight - (gridHeightPx * scale)) / 2;
+
+            // Apply the scale and center the grid
+            gridElement.style.transform = `scale(${scale})`;
+            gridElement.style.transformOrigin = 'top left';
+            gridElement.style.marginLeft = `${marginLeft}px`;
+            gridElement.style.marginTop = `${marginTop}px`;
+            
+            console.log(`地图缩放: ${scale}, 边距: ${marginLeft}px, ${marginTop}px`);
+            
+            gameState.mapScale = scale; // Store the scale factor
+        }
+
+        // 添加改进的canPlaceRoadImproved函数
+        function canPlaceRoadImproved(x, y) {
+            // 检查是否在地图边界内
+            if (x < 0 || x >= GRID_WIDTH || y < 0 || y >= GRID_HEIGHT) {
+                return false;
+            }
+            
+            // 检查位置是否已经被占用
+            if (isPositionOccupied(x, y)) {
+                return false;
+            }
+            
+            // 获取周围的建筑物
+            const buildingTop = gameState.buildings.find(b => b.x === x && b.y === y - 1);
+            const buildingRight = gameState.buildings.find(b => b.x === x + 1 && b.y === y);
+            const buildingBottom = gameState.buildings.find(b => b.x === x && b.y === y + 1);
+            const buildingLeft = gameState.buildings.find(b => b.x === x - 1 && b.y === y);
+            
+            // 检查建筑物连接规则
+            
+            // 1. 允许道路连接到建筑物的底部
+            if (buildingTop) {
+                return true; // 可以放置在建筑物底部
+            }
+            
+            // 2. 检查是否已有周围的道路 - 如果有，我们可以放置
+            const adjacentRoads = [
+                gameState.roads.some(r => r.x === x - 1 && r.y === y),
+                gameState.roads.some(r => r.x === x + 1 && r.y === y),
+                gameState.roads.some(r => r.x === x && r.y === y - 1),
+                gameState.roads.some(r => r.x === x && r.y === y + 1)
+            ];
+            
+            if (adjacentRoads.some(r => r)) {
+                return true; // 有相邻的道路
+            }
+            
+            // 3. 检查是否有周围的建筑物 - 需要特殊规则
+            if (buildingRight || buildingBottom || buildingLeft) {
+                // 允许连接到建筑物的底部，但不允许连接到顶部或侧面
+                return buildingBottom !== null;
+            }
+            
+            // 如果没有周围的建筑物或道路，只有在这是第一个放置的道路时才允许
+            return gameState.roads.length === 0;
+        }
+        
+        // Simplified canPlaceRoad - mainly checks building side connection rule
+
+        // 在所有道路变化后重新计算每条道路最终类型并更新DOM
+        function refreshAllRoadTypes() {
+            gameState.roads.forEach(road => {
+                const newType = determineRoadType(road.x, road.y);
+                if (road.type !== newType) {
+                    road.type = newType;
+                    const el = document.querySelector(`.road[data-x="${road.x}"][data-y="${road.y}"] img`);
+                    if (el) {
+                        el.src = `./road/${newType}.png`;
+                        el.parentElement.dataset.type = newType;
+                    }
+                }
+            });
+        }
+
+        // Helper: check if a road exists at position (x,y)
+        function hasRoadAt(x, y) {
+            return gameState.roads.some(r => r.x === x && r.y === y);
+        }
+    </script>
+</body>
+</html> 
