@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sky City - 修复版测试运行器</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .controls {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        
+        .status {
+            margin-left: auto;
+            color: #666;
+        }
+        
+        .stats {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .passed { color: #28a745; }
+        .failed { color: #dc3545; }
+        .total { color: #007bff; }
+        .rate { color: #17a2b8; }
+        
+        .console {
+            padding: 20px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .error-section {
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .error-item {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .error-title {
+            font-weight: bold;
+            color: #c53030;
+            margin-bottom: 5px;
+        }
+        
+        .error-message {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Sky City 修复版测试</h1>
+            <p>修复了全局变量和文件加载问题的测试版本</p>
+        </div>
+        
+        <div class="controls">
+            <button type="button" id="runTests" class="btn btn-primary">▶️ 运行所有测试</button>
+            <button type="button" id="clearConsole" class="btn btn-secondary">🗑️ 清空控制台</button>
+            <button type="button" id="exportResults" class="btn btn-secondary">📄 导出结果</button>
+            <span id="status" class="status"></span>
+        </div>
+        
+        <div class="stats hidden" id="stats">
+            <div class="stat-card">
+                <div class="stat-number total" id="totalTests">0</div>
+                <div class="stat-label">总测试数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number passed" id="passedTests">0</div>
+                <div class="stat-label">通过</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number failed" id="failedTests">0</div>
+                <div class="stat-label">失败</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number rate" id="successRate">0%</div>
+                <div class="stat-label">成功率</div>
+            </div>
+        </div>
+        
+        <div id="console" class="console">
+            <div class="loading">
+                点击"运行所有测试"开始测试...
+            </div>
+        </div>
+        
+        <div class="error-section hidden" id="errorSection">
+            <h3>❌ 测试失败详情</h3>
+            <div id="errorList"></div>
+        </div>
+    </div>
+
+    <!-- 按正确顺序加载依赖文件 -->
+    <script>
+        // 首先定义全局变量，避免测试时的引用错误
+        window.CONFIG = null;
+        window.GameUtils = null;
+        window.SkyAPI = null;
+        window.skyAPI = null;
+        window.ErrorHandler = null;
+        window.errorHandler = null;
+        window.GameStateManager = null;
+        window.gameStateManager = null;
+    </script>
+    
+    <script src="../js/config.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/error-handler.js"></script>
+    <script src="../js/game-state-manager.js"></script>
+    
+    <!-- 确保全局变量正确设置 -->
+    <script>
+        // 确保所有全局变量都正确设置
+        if (typeof CONFIG !== 'undefined') window.CONFIG = CONFIG;
+        if (typeof GameUtils !== 'undefined') window.GameUtils = GameUtils;
+        if (typeof SkyAPI !== 'undefined') window.SkyAPI = SkyAPI;
+        if (typeof skyAPI !== 'undefined') window.skyAPI = skyAPI;
+        if (typeof ErrorHandler !== 'undefined') window.ErrorHandler = ErrorHandler;
+        if (typeof errorHandler !== 'undefined') window.errorHandler = errorHandler;
+        if (typeof GameStateManager !== 'undefined') window.GameStateManager = GameStateManager;
+        if (typeof gameStateManager !== 'undefined') window.gameStateManager = gameStateManager;
+    </script>
+    
+    <!-- 加载测试框架和测试文件 -->
+    <script src="test-framework.js"></script>
+    <script src="config.test.js"></script>
+    <script src="utils.test.js"></script>
+    <script src="api.test.js"></script>
+    <script src="error-handler.test.js"></script>
+
+    <script>
+        class TestRunner {
+            constructor() {
+                this.consoleElement = document.getElementById('console');
+                this.statsElement = document.getElementById('stats');
+                this.errorSection = document.getElementById('errorSection');
+                this.errorList = document.getElementById('errorList');
+                this.status = document.getElementById('status');
+                this.isRunning = false;
+                this.testResults = null;
+                
+                this.setupEventListeners();
+                this.interceptConsole();
+            }
+            
+            setupEventListeners() {
+                document.getElementById('runTests').addEventListener('click', () => {
+                    if (!this.isRunning) {
+                        this.runTests();
+                    }
+                });
+                
+                document.getElementById('clearConsole').addEventListener('click', () => {
+                    this.clearConsole();
+                });
+                
+                document.getElementById('exportResults').addEventListener('click', () => {
+                    this.exportResults();
+                });
+            }
+            
+            interceptConsole() {
+                const originalLog = console.log;
+                const originalError = console.error;
+                
+                console.log = (...args) => {
+                    this.appendToConsole(args.join(' '), 'log');
+                    originalLog.apply(console, args);
+                };
+                
+                console.error = (...args) => {
+                    this.appendToConsole(args.join(' '), 'error');
+                    originalError.apply(console, args);
+                };
+            }
+            
+            appendToConsole(message, type = 'log') {
+                const timestamp = new Date().toLocaleTimeString();
+                const color = type === 'error' ? '#ff6b6b' : '#d4d4d4';
+                const prefix = type === 'error' ? '❌' : '📝';
+                
+                this.consoleElement.innerHTML += `<span style="color: ${color}">[${timestamp}] ${prefix} ${message}</span>\n`;
+                this.consoleElement.scrollTop = this.consoleElement.scrollHeight;
+            }
+            
+            clearConsole() {
+                this.consoleElement.innerHTML = '';
+                this.statsElement.classList.add('hidden');
+                this.errorSection.classList.add('hidden');
+                this.status.textContent = '';
+            }
+            
+            async runTests() {
+                this.isRunning = true;
+                this.clearConsole();
+                this.status.textContent = '🔄 运行中...';
+                
+                const runButton = document.getElementById('runTests');
+                runButton.textContent = '⏳ 运行中...';
+                runButton.disabled = true;
+                
+                try {
+                    this.appendToConsole('开始运行 Sky City 单元测试...', 'log');
+                    this.appendToConsole('='.repeat(50), 'log');
+                    
+                    // 检查依赖是否加载
+                    this.checkDependencies();
+                    
+                    // 运行测试
+                    await testFramework.runTests();
+                    
+                    // 获取结果
+                    this.testResults = testFramework.results;
+                    
+                    // 更新统计信息
+                    this.updateStats();
+                    
+                    // 显示错误详情
+                    this.showErrorDetails();
+                    
+                    this.status.textContent = this.testResults.failed === 0 ? '✅ 全部通过' : '⚠️ 有测试失败';
+                    
+                } catch (error) {
+                    this.appendToConsole(`测试运行出错: ${error.message}`, 'error');
+                    this.status.textContent = '❌ 运行出错';
+                } finally {
+                    this.isRunning = false;
+                    runButton.textContent = '▶️ 运行所有测试';
+                    runButton.disabled = false;
+                }
+            }
+            
+            checkDependencies() {
+                const dependencies = [
+                    { name: 'CONFIG', obj: window.CONFIG },
+                    { name: 'GameUtils', obj: window.GameUtils },
+                    { name: 'SkyAPI', obj: window.SkyAPI },
+                    { name: 'skyAPI', obj: window.skyAPI },
+                    { name: 'ErrorHandler', obj: window.ErrorHandler },
+                    { name: 'errorHandler', obj: window.errorHandler }
+                ];
+                
+                this.appendToConsole('检查依赖加载状态:', 'log');
+                dependencies.forEach(dep => {
+                    const status = dep.obj ? '✅' : '❌';
+                    this.appendToConsole(`${status} ${dep.name}: ${dep.obj ? 'loaded' : 'not found'}`, 'log');
+                });
+                this.appendToConsole('', 'log');
+            }
+            
+            updateStats() {
+                if (!this.testResults) return;
+                
+                document.getElementById('totalTests').textContent = this.testResults.total;
+                document.getElementById('passedTests').textContent = this.testResults.passed;
+                document.getElementById('failedTests').textContent = this.testResults.failed;
+                
+                const rate = this.testResults.total > 0 
+                    ? ((this.testResults.passed / this.testResults.total) * 100).toFixed(1)
+                    : 0;
+                document.getElementById('successRate').textContent = `${rate}%`;
+                
+                this.statsElement.classList.remove('hidden');
+            }
+            
+            showErrorDetails() {
+                if (this.testResults && this.testResults.failed > 0) {
+                    this.errorSection.classList.remove('hidden');
+                    this.errorList.innerHTML = `
+                        <div class="error-item">
+                            <div class="error-title">发现 ${this.testResults.failed} 个测试失败</div>
+                            <div class="error-message">请查看上方控制台输出获取详细错误信息</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            exportResults() {
+                if (!this.testResults) {
+                    alert('请先运行测试');
+                    return;
+                }
+                
+                const report = {
+                    timestamp: new Date().toISOString(),
+                    results: this.testResults,
+                    consoleOutput: this.consoleElement.textContent,
+                    userAgent: navigator.userAgent,
+                    url: window.location.href
+                };
+                
+                const blob = new Blob([JSON.stringify(report, null, 2)], {
+                    type: 'application/json'
+                });
+                
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `sky-city-test-results-fixed-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+        
+        // 初始化测试运行器
+        document.addEventListener('DOMContentLoaded', () => {
+            new TestRunner();
+        });
+    </script>
+</body>
+</html>

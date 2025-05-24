@@ -13,7 +13,7 @@
             height: 100%;
             background: linear-gradient(to bottom, #a1c4fd, #c2e9fb);
         }
-        
+
         /* Container */
         .container {
             display: flex;
@@ -24,26 +24,26 @@
             box-sizing: border-box;
             position: relative;
         }
-        
+
         /* Header */
         .header {
             text-align: center;
             margin-bottom: 40px;
         }
-        
+
         .header h1 {
             font-size: 2.5em;
             color: #2b6cb0;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .header p {
             color: #4a5568;
             font-size: 1.1em;
             max-width: 600px;
         }
-        
+
         /* Ranking Table */
         .ranking-container {
             background-color: white;
@@ -54,18 +54,18 @@
             overflow: hidden;
             margin-bottom: 40px;
         }
-        
+
         .ranking-table {
             width: 100%;
             border-collapse: collapse;
         }
-        
+
         .ranking-table th, .ranking-table td {
             padding: 15px;
             text-align: left;
             border-bottom: 1px solid #e2e8f0;
         }
-        
+
         .ranking-table th {
             background-color: #4299e1;
             color: white;
@@ -74,38 +74,38 @@
             font-size: 0.9em;
             letter-spacing: 1px;
         }
-        
+
         .ranking-table tbody tr:hover {
             background-color: #f7fafc;
         }
-        
+
         .ranking-table tr:nth-child(even) {
             background-color: #f7fafc;
         }
-        
+
         .rank-number {
             font-weight: bold;
             color: #2b6cb0;
             width: 80px;
             text-align: center;
         }
-        
+
         .player-name {
             font-weight: 500;
             color: #2d3748;
         }
-        
+
         .score-value {
             font-weight: 600;
             color: #2b6cb0;
             text-align: right;
         }
-        
+
         .time-value {
             color: #718096;
             text-align: right;
         }
-        
+
         /* Top Players */
         .top-players {
             display: flex;
@@ -115,7 +115,7 @@
             width: 100%;
             max-width: 800px;
         }
-        
+
         .player-card {
             background-color: white;
             border-radius: 10px;
@@ -124,7 +124,7 @@
             text-align: center;
             position: relative;
         }
-        
+
         .player-position {
             position: absolute;
             top: -15px;
@@ -142,22 +142,22 @@
             font-size: 1.2em;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
+
         .first-place .player-position {
             background-color: gold;
             color: #2d3748;
         }
-        
+
         .second-place .player-position {
             background-color: silver;
             color: #2d3748;
         }
-        
+
         .third-place .player-position {
             background-color: #cd7f32; /* bronze */
             color: white;
         }
-        
+
         .player-avatar {
             width: 80px;
             height: 80px;
@@ -169,17 +169,17 @@
             align-items: center;
             font-size: 2em;
         }
-        
+
         .player-info {
             padding: 15px;
         }
-        
+
         .player-info h3 {
             margin: 0 0 5px;
             color: #2d3748;
             font-size: 1.1em;
         }
-        
+
         .player-stats {
             display: flex;
             justify-content: space-between;
@@ -187,23 +187,23 @@
             padding-top: 15px;
             border-top: 1px solid #e2e8f0;
         }
-        
+
         .stat {
             text-align: center;
             flex: 1;
         }
-        
+
         .stat-value {
             font-weight: bold;
             color: #2b6cb0;
             font-size: 1.2em;
         }
-        
+
         .stat-label {
             font-size: 0.8em;
             color: #718096;
         }
-        
+
         /* Back Button */
         .back-btn {
             position: absolute;
@@ -222,11 +222,11 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: background-color 0.3s ease;
         }
-        
+
         .back-btn:hover {
             background-color: rgba(255, 255, 255, 1);
         }
-        
+
         /* Loading Indicator */
         .loading {
             display: flex;
@@ -235,7 +235,7 @@
             justify-content: center;
             padding: 40px;
         }
-        
+
         .loading-spinner {
             border: 5px solid #f3f3f3;
             border-top: 5px solid #3498db;
@@ -245,19 +245,40 @@
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
         /* No Data Message */
         .no-data {
             text-align: center;
             padding: 40px;
             color: #718096;
         }
-        
+
+        /* Debug Button */
+        .debug-button {
+            padding: 8px 16px;
+            margin-top: 10px;
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .debug-button:hover {
+            background-color: #3182ce;
+        }
+
+        /* Hidden elements */
+        .hidden {
+            display: none !important;
+        }
+
         /* Error Message */
         .error-message {
             text-align: center;
@@ -267,28 +288,28 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
-        
+
         /* Responsive Adjustments */
         @media (max-width: 768px) {
             .top-players {
                 flex-direction: column;
                 align-items: center;
             }
-            
+
             .player-card {
                 width: 100%;
                 max-width: 300px;
             }
-            
+
             .rank-number, .time-value {
                 display: none;
             }
-            
+
             .ranking-table th:first-child, .ranking-table td:first-child,
             .ranking-table th:last-child, .ranking-table td:last-child {
                 display: none;
             }
-            
+
             .header h1 {
                 font-size: 2em;
             }
@@ -297,33 +318,33 @@
 </head>
 <body>
     <div class="container">
-        <button class="back-btn" id="backBtn">←</button>
-        
+        <button type="button" class="back-btn" id="backBtn">←</button>
+
         <div class="header">
             <h1>Sky City Leaderboard</h1>
             <p>The greatest city builders are immortalized here. Can you reach the top spot?</p>
-            <button id="debugButton" style="padding: 8px 16px; margin-top: 10px; background-color: #4299e1; color: white; border: none; border-radius: 5px; cursor: pointer;">重新加载排行榜</button>
+            <button type="button" id="debugButton" class="debug-button">重新加载排行榜</button>
         </div>
-        
+
         <div class="top-players" id="topPlayers">
             <!-- Top players will be added here via JavaScript -->
         </div>
-        
+
         <div class="ranking-container">
             <div class="loading" id="loadingIndicator">
                 <div class="loading-spinner"></div>
                 <p>Loading ranking data...</p>
             </div>
-            
-            <div class="error-message" id="errorMessage" style="display: none;">
+
+            <div class="error-message hidden" id="errorMessage">
                 Error loading ranking data. Please try again later.
             </div>
-            
-            <div class="no-data" id="noDataMessage" style="display: none;">
+
+            <div class="no-data hidden" id="noDataMessage">
                 No ranking data available yet. Be the first to make it to the leaderboard!
             </div>
-            
-            <table class="ranking-table" id="rankingTable" style="display: none;">
+
+            <table class="ranking-table hidden" id="rankingTable">
                 <thead>
                     <tr>
                         <th>Rank</th>
@@ -338,7 +359,7 @@
             </table>
         </div>
     </div>
-    
+
     <script>
         // DOM Elements
         const backBtn = document.getElementById('backBtn');
@@ -348,21 +369,21 @@
         const noDataMessage = document.getElementById('noDataMessage');
         const rankingTable = document.getElementById('rankingTable');
         const rankingBody = document.getElementById('rankingBody');
-        
+
         // Event Listeners
         backBtn.addEventListener('click', () => {
             window.location.href = 'index.html';
         });
-        
+
         // 添加重新加载按钮事件处理
         document.getElementById('debugButton').addEventListener('click', () => {
             console.log('手动重新加载排行榜');
             fetchRankingData();
         });
-        
+
         // Fetch ranking data when page loads
         document.addEventListener('DOMContentLoaded', fetchRankingData);
-        
+
         // Fetch ranking data from the server
         function fetchRankingData() {
             // Show loading indicator
@@ -370,9 +391,9 @@
             errorMessage.style.display = 'none';
             noDataMessage.style.display = 'none';
             rankingTable.style.display = 'none';
-            
+
             // Use actual fetch now
-            fetch(`http://localhost:8000/backend/api/v1/rank.php?nocache=${new Date().getTime()}`) // 完整URL加随机参数避免缓存
+            fetch(`backend/api/v1/rank.php?nocache=${new Date().getTime()}`) // 使用相对路径
                 .then(response => {
                     console.log('API Response:', response.status, response.statusText);
                     if (!response.ok) {
@@ -384,14 +405,14 @@
                     console.log('Ranking Data:', rankingData);
                     // Hide loading indicator
                     loadingIndicator.style.display = 'none';
-                    
+
                     if (rankingData.length === 0) {
                         // Show no data message
                         noDataMessage.style.display = 'block';
                     } else {
                         // Display top players
                         displayTopPlayers(rankingData.slice(0, 3));
-                        
+
                         // Display ranking table
                         displayRankingTable(rankingData);
                         rankingTable.style.display = 'table';
@@ -403,22 +424,22 @@
                     errorMessage.style.display = 'block';
                     errorMessage.textContent = `加载失败: ${error.message || error}`;
                     console.error('Error fetching ranking data from API:', error);
-                    
+
                     // 不再使用localStorage备份
                 });
         }
-        
+
         // Display top 3 players
         function displayTopPlayers(topPlayers) {
             topPlayersContainer.innerHTML = '';
-            
+
             const positions = ['first-place', 'second-place', 'third-place'];
             const emojis = ['👑', '🥈', '🥉'];
-            
+
             topPlayers.forEach((player, index) => {
                 const playerCard = document.createElement('div');
                 playerCard.className = `player-card ${positions[index]}`;
-                
+
                 playerCard.innerHTML = `
                     <div class="player-position">${index + 1}</div>
                     <div class="player-avatar">${emojis[index]}</div>
@@ -436,28 +457,28 @@
                         </div>
                     </div>
                 `;
-                
+
                 topPlayersContainer.appendChild(playerCard);
             });
         }
-        
+
         // Display ranking table
         function displayRankingTable(rankingData) {
             rankingBody.innerHTML = '';
-            
+
             rankingData.forEach(player => {
                 const row = document.createElement('tr');
-                
+
                 row.innerHTML = `
                     <td class="rank-number">${player.rank}</td>
                     <td class="player-name">${player.nickname}</td>
                     <td class="score-value">${player.score}</td>
                     <td class="time-value">${player.time} sec</td>
                 `;
-                
+
                 rankingBody.appendChild(row);
             });
         }
     </script>
 </body>
-</html> 
+</html>

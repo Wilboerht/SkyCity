@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sky City - 后端API测试</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .test-section {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .test-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ddd;
+        }
+        
+        .test-item.success {
+            background-color: #d1edff;
+            border-left-color: #28a745;
+        }
+        
+        .test-item.error {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        
+        .test-item.running {
+            background-color: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .test-result {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-primary:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .summary {
+            padding: 20px;
+            text-align: center;
+            background-color: #f8f9fa;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .json-display {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 0.8em;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Sky City 后端API测试</h1>
+            <p>测试所有后端API接口和功能</p>
+        </div>
+        
+        <div class="test-section">
+            <h3>测试控制</h3>
+            <button type="button" id="startTest" class="btn btn-primary">开始后端测试</button>
+            <button type="button" id="clearResults" class="btn btn-primary">清空结果</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>API连接测试</h3>
+            <div id="connectionTests"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>数据操作测试</h3>
+            <div id="dataTests"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>错误处理测试</h3>
+            <div id="errorTests"></div>
+        </div>
+        
+        <div class="summary hidden" id="summary">
+            <h3>测试总结</h3>
+            <div id="summaryContent"></div>
+        </div>
+    </div>
+
+    <script>
+        class BackendTester {
+            constructor() {
+                this.apiEndpoint = '../backend/api/v1/rank.php';
+                this.improvedEndpoint = '../backend/api/v1/rank_improved.php';
+                this.v2Endpoint = '../backend/api/v1/rank_v2.php';
+                
+                this.results = {
+                    total: 0,
+                    passed: 0,
+                    failed: 0,
+                    errors: []
+                };
+                
+                this.setupEventListeners();
+            }
+            
+            setupEventListeners() {
+                document.getElementById('startTest').addEventListener('click', () => {
+                    this.runAllTests();
+                });
+                
+                document.getElementById('clearResults').addEventListener('click', () => {
+                    this.clearResults();
+                });
+            }
+            
+            clearResults() {
+                document.getElementById('connectionTests').innerHTML = '';
+                document.getElementById('dataTests').innerHTML = '';
+                document.getElementById('errorTests').innerHTML = '';
+                document.getElementById('summary').classList.add('hidden');
+                this.results = { total: 0, passed: 0, failed: 0, errors: [] };
+            }
+            
+            async runAllTests() {
+                this.clearResults();
+                document.getElementById('startTest').disabled = true;
+                
+                try {
+                    // API连接测试
+                    await this.testAPIConnection();
+                    await this.testAPIVersions();
+                    
+                    // 数据操作测试
+                    await this.testGetRankings();
+                    await this.testPostScore();
+                    await this.testDataValidation();
+                    
+                    // 错误处理测试
+                    await this.testErrorHandling();
+                    await this.testCORSHeaders();
+                    
+                    this.showSummary();
+                    
+                } catch (error) {
+                    this.addTestResult('errorTests', '测试执行错误', false, error.message);
+                } finally {
+                    document.getElementById('startTest').disabled = false;
+                }
+            }
+            
+            async testAPIConnection() {
+                const testName = 'API基础连接测试';
+                this.addTestResult('connectionTests', testName, null, '测试中...');
+                
+                try {
+                    const response = await fetch(this.apiEndpoint, {
+                        method: 'OPTIONS'
+                    });
+                    
+                    if (response.ok) {
+                        this.addTestResult('connectionTests', testName, true, 
+                            `连接成功 (${response.status})`);
+                    } else {
+                        this.addTestResult('connectionTests', testName, false, 
+                            `连接失败 (${response.status})`);
+                    }
+                } catch (error) {
+                    this.addTestResult('connectionTests', testName, false, 
+                        `网络错误: ${error.message}`);
+                }
+            }
+            
+            async testAPIVersions() {
+                const versions = [
+                    { name: '原始版本', endpoint: this.apiEndpoint },
+                    { name: '改进版本', endpoint: this.improvedEndpoint },
+                    { name: 'V2版本', endpoint: this.v2Endpoint }
+                ];
+                
+                for (const version of versions) {
+                    const testName = `${version.name} API可用性`;
+                    this.addTestResult('connectionTests', testName, null, '测试中...');
+                    
+                    try {
+                        const response = await fetch(version.endpoint, {
+                            method: 'GET'
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.addTestResult('connectionTests', testName, true, 
+                                `API可用，返回 ${Array.isArray(data) ? data.length : '数据'} 条记录`);
+                        } else {
+                            this.addTestResult('connectionTests', testName, false, 
+                                `HTTP ${response.status}: ${response.statusText}`);
+                        }
+                    } catch (error) {
+                        this.addTestResult('connectionTests', testName, false, 
+                            `请求失败: ${error.message}`);
+                    }
+                }
+            }
+            
+            async testGetRankings() {
+                const testName = 'GET排行榜数据';
+                this.addTestResult('dataTests', testName, null, '测试中...');
+                
+                try {
+                    const response = await fetch(this.apiEndpoint);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (Array.isArray(data)) {
+                            this.addTestResult('dataTests', testName, true, 
+                                `成功获取 ${data.length} 条排行榜记录`, 
+                                JSON.stringify(data.slice(0, 3), null, 2));
+                        } else {
+                            this.addTestResult('dataTests', testName, false, 
+                                '返回数据格式错误，期望数组');
+                        }
+                    } else {
+                        this.addTestResult('dataTests', testName, false, 
+                            `HTTP ${response.status}: ${response.statusText}`);
+                    }
+                } catch (error) {
+                    this.addTestResult('dataTests', testName, false, 
+                        `请求失败: ${error.message}`);
+                }
+            }
+            
+            async testPostScore() {
+                const testName = 'POST提交分数';
+                this.addTestResult('dataTests', testName, null, '测试中...');
+                
+                const testData = {
+                    name: `测试玩家_${Date.now()}`,
+                    score: Math.floor(Math.random() * 1000) + 500,
+                    time: Math.floor(Math.random() * 60) + 30
+                };
+                
+                try {
+                    const response = await fetch(this.apiEndpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(testData)
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        this.addTestResult('dataTests', testName, true, 
+                            `分数提交成功，排名: ${result.rank}`, 
+                            JSON.stringify(result, null, 2));
+                    } else {
+                        const errorText = await response.text();
+                        this.addTestResult('dataTests', testName, false, 
+                            `提交失败 (${response.status}): ${errorText}`);
+                    }
+                } catch (error) {
+                    this.addTestResult('dataTests', testName, false, 
+                        `请求失败: ${error.message}`);
+                }
+            }
+            
+            async testDataValidation() {
+                const testName = '数据验证测试';
+                this.addTestResult('dataTests', testName, null, '测试中...');
+                
+                const invalidData = {
+                    name: '', // 空名称
+                    score: -100, // 负分数
+                    time: 'invalid' // 无效时间
+                };
+                
+                try {
+                    const response = await fetch(this.apiEndpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(invalidData)
+                    });
+                    
+                    if (response.status === 400) {
+                        this.addTestResult('dataTests', testName, true, 
+                            '数据验证正常工作，正确拒绝无效数据');
+                    } else {
+                        this.addTestResult('dataTests', testName, false, 
+                            `期望400错误，但得到 ${response.status}`);
+                    }
+                } catch (error) {
+                    this.addTestResult('dataTests', testName, false, 
+                        `请求失败: ${error.message}`);
+                }
+            }
+            
+            async testErrorHandling() {
+                const testName = '错误处理测试';
+                this.addTestResult('errorTests', testName, null, '测试中...');
+                
+                try {
+                    // 测试不支持的HTTP方法
+                    const response = await fetch(this.apiEndpoint, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.status === 405) {
+                        this.addTestResult('errorTests', testName, true, 
+                            '错误处理正常，正确返回405 Method Not Allowed');
+                    } else {
+                        this.addTestResult('errorTests', testName, false, 
+                            `期望405错误，但得到 ${response.status}`);
+                    }
+                } catch (error) {
+                    this.addTestResult('errorTests', testName, false, 
+                        `请求失败: ${error.message}`);
+                }
+            }
+            
+            async testCORSHeaders() {
+                const testName = 'CORS头部测试';
+                this.addTestResult('errorTests', testName, null, '测试中...');
+                
+                try {
+                    const response = await fetch(this.apiEndpoint, {
+                        method: 'OPTIONS'
+                    });
+                    
+                    const corsHeader = response.headers.get('Access-Control-Allow-Origin');
+                    const methodsHeader = response.headers.get('Access-Control-Allow-Methods');
+                    
+                    if (corsHeader && methodsHeader) {
+                        this.addTestResult('errorTests', testName, true, 
+                            `CORS配置正确: Origin=${corsHeader}, Methods=${methodsHeader}`);
+                    } else {
+                        this.addTestResult('errorTests', testName, false, 
+                            'CORS头部缺失或不完整');
+                    }
+                } catch (error) {
+                    this.addTestResult('errorTests', testName, false, 
+                        `请求失败: ${error.message}`);
+                }
+            }
+            
+            addTestResult(containerId, testName, success, message, data = null) {
+                const container = document.getElementById(containerId);
+                const existingTest = container.querySelector(`[data-test="${testName}"]`);
+                
+                if (existingTest) {
+                    existingTest.remove();
+                }
+                
+                const testElement = document.createElement('div');
+                testElement.className = `test-item ${success === null ? 'running' : (success ? 'success' : 'error')}`;
+                testElement.setAttribute('data-test', testName);
+                
+                const statusIcon = success === null ? '⏳' : (success ? '✅' : '❌');
+                
+                testElement.innerHTML = `
+                    <div class="test-name">${statusIcon} ${testName}</div>
+                    <div class="test-result">${message}</div>
+                    ${data ? `<div class="json-display">${data}</div>` : ''}
+                `;
+                
+                container.appendChild(testElement);
+                
+                // 更新统计
+                if (success !== null) {
+                    this.results.total++;
+                    if (success) {
+                        this.results.passed++;
+                    } else {
+                        this.results.failed++;
+                        this.results.errors.push({ test: testName, error: message });
+                    }
+                }
+            }
+            
+            showSummary() {
+                const summaryContent = document.getElementById('summaryContent');
+                const successRate = this.results.total > 0 
+                    ? ((this.results.passed / this.results.total) * 100).toFixed(1)
+                    : 0;
+                
+                summaryContent.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                        <div>
+                            <div style="font-size: 2em; font-weight: bold; color: #007bff;">${this.results.total}</div>
+                            <div>总测试数</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2em; font-weight: bold; color: #28a745;">${this.results.passed}</div>
+                            <div>通过</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2em; font-weight: bold; color: #dc3545;">${this.results.failed}</div>
+                            <div>失败</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2em; font-weight: bold; color: #17a2b8;">${successRate}%</div>
+                            <div>成功率</div>
+                        </div>
+                    </div>
+                    ${this.results.failed === 0 ? 
+                        '<div style="color: #28a745; font-weight: bold; font-size: 1.2em;">🎉 所有后端测试通过！</div>' :
+                        `<div style="color: #dc3545; font-weight: bold;">发现 ${this.results.failed} 个问题，请检查详细信息。</div>`
+                    }
+                `;
+                
+                document.getElementById('summary').classList.remove('hidden');
+            }
+        }
+        
+        // 初始化测试器
+        document.addEventListener('DOMContentLoaded', () => {
+            new BackendTester();
+        });
+    </script>
+</body>
+</html>

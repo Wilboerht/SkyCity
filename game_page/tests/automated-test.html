@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sky City - 自动化测试</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .test-section {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .test-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .test-item.running {
+            background-color: #fff3cd;
+            border-left-color: #ffc107;
+        }
+
+        .test-item.success {
+            background-color: #d1edff;
+            border-left-color: #28a745;
+        }
+
+        .test-item.error {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .test-name {
+            font-weight: bold;
+        }
+
+        .test-status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .status-running {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .status-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-error {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .summary {
+            padding: 20px;
+            text-align: center;
+            background-color: #f8f9fa;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-primary:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #28a745;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Sky City 自动化测试</h1>
+            <p>全面检测项目功能和性能</p>
+        </div>
+
+        <div class="test-section">
+            <h3>测试控制</h3>
+            <button type="button" id="startTest" class="btn btn-primary">开始自动化测试</button>
+            <button type="button" id="stopTest" class="btn btn-primary" disabled>停止测试</button>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div id="progressText">准备开始测试...</div>
+        </div>
+
+        <div class="test-section">
+            <h3>文件加载测试</h3>
+            <div id="fileTests"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>功能模块测试</h3>
+            <div id="moduleTests"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>API接口测试</h3>
+            <div id="apiTests"></div>
+        </div>
+
+        <div class="summary hidden" id="summary">
+            <h3>测试总结</h3>
+            <div id="summaryContent"></div>
+        </div>
+    </div>
+
+    <!-- 加载依赖文件 -->
+    <script src="../js/config.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/error-handler.js"></script>
+    <script src="../js/game-state-manager.js"></script>
+
+    <script>
+        class AutomatedTester {
+            constructor() {
+                this.tests = [];
+                this.currentTestIndex = 0;
+                this.isRunning = false;
+                this.results = {
+                    total: 0,
+                    passed: 0,
+                    failed: 0,
+                    errors: []
+                };
+
+                this.setupTests();
+                this.setupEventListeners();
+            }
+
+            setupTests() {
+                // 文件加载测试
+                this.tests.push({
+                    category: 'file',
+                    name: '配置文件加载',
+                    test: () => this.testConfigLoad()
+                });
+
+                this.tests.push({
+                    category: 'file',
+                    name: '工具函数加载',
+                    test: () => this.testUtilsLoad()
+                });
+
+                this.tests.push({
+                    category: 'file',
+                    name: 'API模块加载',
+                    test: () => this.testAPILoad()
+                });
+
+                this.tests.push({
+                    category: 'file',
+                    name: '错误处理器加载',
+                    test: () => this.testErrorHandlerLoad()
+                });
+
+                // 功能模块测试
+                this.tests.push({
+                    category: 'module',
+                    name: '配置验证',
+                    test: () => this.testConfigValidation()
+                });
+
+                this.tests.push({
+                    category: 'module',
+                    name: '工具函数功能',
+                    test: () => this.testUtilsFunctions()
+                });
+
+                this.tests.push({
+                    category: 'module',
+                    name: '错误处理功能',
+                    test: () => this.testErrorHandling()
+                });
+
+                this.tests.push({
+                    category: 'module',
+                    name: '状态管理功能',
+                    test: () => this.testStateManagement()
+                });
+
+                // API测试
+                this.tests.push({
+                    category: 'api',
+                    name: 'API实例创建',
+                    test: () => this.testAPIInstance()
+                });
+
+                this.tests.push({
+                    category: 'api',
+                    name: '数据验证功能',
+                    test: () => this.testDataValidation()
+                });
+
+                this.results.total = this.tests.length;
+            }
+
+            setupEventListeners() {
+                document.getElementById('startTest').addEventListener('click', () => {
+                    this.startTests();
+                });
+
+                document.getElementById('stopTest').addEventListener('click', () => {
+                    this.stopTests();
+                });
+            }
+
+            async startTests() {
+                this.isRunning = true;
+                this.currentTestIndex = 0;
+                this.results = { total: this.tests.length, passed: 0, failed: 0, errors: [] };
+
+                document.getElementById('startTest').disabled = true;
+                document.getElementById('stopTest').disabled = false;
+                document.getElementById('summary').classList.add('hidden');
+
+                this.renderTestItems();
+
+                for (let i = 0; i < this.tests.length && this.isRunning; i++) {
+                    this.currentTestIndex = i;
+                    await this.runSingleTest(this.tests[i], i);
+                    this.updateProgress();
+                }
+
+                this.finishTests();
+            }
+
+            stopTests() {
+                this.isRunning = false;
+                document.getElementById('startTest').disabled = false;
+                document.getElementById('stopTest').disabled = true;
+            }
+
+            async runSingleTest(test, index) {
+                const testElement = document.getElementById(`test-${index}`);
+                const statusElement = testElement.querySelector('.test-status');
+
+                // 设置运行状态
+                testElement.className = 'test-item running';
+                statusElement.className = 'test-status status-running';
+                statusElement.textContent = '运行中...';
+
+                try {
+                    await test.test();
+
+                    // 测试通过
+                    testElement.className = 'test-item success';
+                    statusElement.className = 'test-status status-success';
+                    statusElement.textContent = '✅ 通过';
+                    this.results.passed++;
+
+                } catch (error) {
+                    // 测试失败
+                    testElement.className = 'test-item error';
+                    statusElement.className = 'test-status status-error';
+                    statusElement.textContent = '❌ 失败';
+                    this.results.failed++;
+                    this.results.errors.push({
+                        test: test.name,
+                        error: error.message
+                    });
+
+                    console.error(`Test failed: ${test.name}`, error);
+                }
+
+                // 等待一下让用户看到结果
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            renderTestItems() {
+                const categories = {
+                    file: document.getElementById('fileTests'),
+                    module: document.getElementById('moduleTests'),
+                    api: document.getElementById('apiTests')
+                };
+
+                // 清空现有内容
+                Object.values(categories).forEach(container => {
+                    container.innerHTML = '';
+                });
+
+                this.tests.forEach((test, index) => {
+                    const testElement = document.createElement('div');
+                    testElement.className = 'test-item';
+                    testElement.id = `test-${index}`;
+                    testElement.innerHTML = `
+                        <div class="test-name">${test.name}</div>
+                        <div class="test-status status-pending">等待中</div>
+                    `;
+
+                    categories[test.category].appendChild(testElement);
+                });
+            }
+
+            updateProgress() {
+                const progress = ((this.currentTestIndex + 1) / this.tests.length) * 100;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+                document.getElementById('progressText').textContent =
+                    `进度: ${this.currentTestIndex + 1}/${this.tests.length} (${progress.toFixed(1)}%)`;
+            }
+
+            finishTests() {
+                this.isRunning = false;
+                document.getElementById('startTest').disabled = false;
+                document.getElementById('stopTest').disabled = true;
+
+                // 显示总结
+                const summaryContent = document.getElementById('summaryContent');
+                const successRate = ((this.results.passed / this.results.total) * 100).toFixed(1);
+
+                summaryContent.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                        <div>
+                            <div style="font-size: 2em; font-weight: bold; color: #007bff;">${this.results.total}</div>
+                            <div>总测试数</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2em; font-weight: bold; color: #28a745;">${this.results.passed}</div>
+                            <div>通过</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2em; font-weight: bold; color: #dc3545;">${this.results.failed}</div>
+                            <div>失败</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 2em; font-weight: bold; color: #17a2b8;">${successRate}%</div>
+                            <div>成功率</div>
+                        </div>
+                    </div>
+                    ${this.results.failed === 0 ?
+                        '<div style="color: #28a745; font-weight: bold; font-size: 1.2em;">🎉 所有测试通过！项目状态良好。</div>' :
+                        `<div style="color: #dc3545; font-weight: bold;">发现 ${this.results.failed} 个问题，请检查详细信息。</div>`
+                    }
+                `;
+
+                document.getElementById('summary').classList.remove('hidden');
+            }
+
+            // 测试方法
+            async testConfigLoad() {
+                if (typeof CONFIG === 'undefined') {
+                    throw new Error('CONFIG not loaded');
+                }
+                if (!CONFIG.API || !CONFIG.GAME || !CONFIG.UI) {
+                    throw new Error('CONFIG structure incomplete');
+                }
+            }
+
+            async testUtilsLoad() {
+                if (typeof GameUtils === 'undefined') {
+                    throw new Error('GameUtils not loaded');
+                }
+                if (typeof GameUtils.formatTime !== 'function') {
+                    throw new Error('GameUtils methods not available');
+                }
+            }
+
+            async testAPILoad() {
+                if (typeof SkyAPI === 'undefined') {
+                    throw new Error('SkyAPI class not loaded');
+                }
+                if (typeof skyAPI === 'undefined') {
+                    throw new Error('skyAPI instance not created');
+                }
+            }
+
+            async testErrorHandlerLoad() {
+                if (typeof ErrorHandler === 'undefined') {
+                    throw new Error('ErrorHandler class not loaded');
+                }
+                if (typeof errorHandler === 'undefined') {
+                    throw new Error('errorHandler instance not created');
+                }
+            }
+
+            async testConfigValidation() {
+                // 测试配置值的合理性
+                if (CONFIG.GAME.GRID_WIDTH <= 0 || CONFIG.GAME.GRID_HEIGHT <= 0) {
+                    throw new Error('Invalid grid dimensions');
+                }
+                if (CONFIG.GAME.TIMER_START <= 0) {
+                    throw new Error('Invalid timer start value');
+                }
+                if (!CONFIG.API.ENDPOINTS.RANKING) {
+                    throw new Error('Missing ranking endpoint');
+                }
+            }
+
+            async testUtilsFunctions() {
+                // 测试工具函数
+                const timeFormatted = GameUtils.formatTime(90);
+                if (timeFormatted !== '1:30') {
+                    throw new Error('Time formatting failed');
+                }
+
+                const id1 = GameUtils.generateId();
+                const id2 = GameUtils.generateId();
+                if (id1 === id2) {
+                    throw new Error('ID generation not unique');
+                }
+
+                const testObj = { a: 1, b: { c: 2 } };
+                const cloned = GameUtils.deepClone(testObj);
+                if (cloned === testObj || cloned.b === testObj.b) {
+                    throw new Error('Deep clone failed');
+                }
+            }
+
+            async testErrorHandling() {
+                // 测试错误处理功能
+                const initialErrorCount = errorHandler.errors.length;
+                errorHandler.createError('Test Error', 'Test message');
+                if (errorHandler.errors.length <= initialErrorCount) {
+                    throw new Error('Error logging failed');
+                }
+            }
+
+            async testStateManagement() {
+                if (typeof gameStateManager === 'undefined') {
+                    throw new Error('gameStateManager not available');
+                }
+
+                // 测试状态保存
+                const testState = { level: 1, score: 100, coins: 500, timer: 60 };
+                const stateId = gameStateManager.saveState(testState, 'Test State');
+                if (!stateId) {
+                    throw new Error('State saving failed');
+                }
+
+                // 测试状态加载
+                const loadedState = gameStateManager.loadState(stateId);
+                if (!loadedState || loadedState.score !== 100) {
+                    throw new Error('State loading failed');
+                }
+            }
+
+            async testAPIInstance() {
+                if (!(skyAPI instanceof SkyAPI)) {
+                    throw new Error('skyAPI is not instance of SkyAPI');
+                }
+
+                if (typeof skyAPI.submitScore !== 'function') {
+                    throw new Error('submitScore method not available');
+                }
+
+                if (typeof skyAPI.getRankings !== 'function') {
+                    throw new Error('getRankings method not available');
+                }
+            }
+
+            async testDataValidation() {
+                // 测试有效数据
+                const validData = { name: 'TestPlayer', score: 1000, time: 60 };
+                if (!skyAPI.validateScoreData(validData)) {
+                    throw new Error('Valid data rejected');
+                }
+
+                // 测试无效数据
+                const invalidData = { name: '', score: -1, time: 'invalid' };
+                if (skyAPI.validateScoreData(invalidData)) {
+                    throw new Error('Invalid data accepted');
+                }
+            }
+        }
+
+        // 初始化测试器
+        document.addEventListener('DOMContentLoaded', () => {
+            new AutomatedTester();
+        });
+    </script>
+</body>
+</html>
